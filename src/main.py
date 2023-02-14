@@ -15,6 +15,9 @@ class CarryMyLuggage():
         # for robot arm manipulation
         self.arm_joint_pub = rospy.Publisher("/arm_joint", Float32MultiArray, queue_size=1)
         self.arm_gripper_pub = rospy.Publisher("/arm_gripper", String, queue_size=1)
+
+        # for audio
+        self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
     
     def main(self):
         # wait for nodes
