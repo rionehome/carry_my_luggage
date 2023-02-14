@@ -22,7 +22,7 @@ class CarryMyLuggage():
     def main(self):
         # wait for nodes
         time.sleep(3)
-
+        self.audio_pub.publish("テスト")
         """
         self.arm_gripper_pub.publish("init")
         time.sleep(1)
