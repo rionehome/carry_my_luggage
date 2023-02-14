@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<launch>
+  <include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
+
+  <include file="$(find open_manipulator_controller)/launch/open_manipulator_controller.launch"/>
+
+  <node pkg="carry_my_luggage" name="main" type="main.py" required="true" output="screen" />
+  <node pkg="carry_my_luggage" name="move" type="move.py" required="true" output="screen" /> -->
+  <node pkg="carry_my_luggage" name="arm" type="arm.py" required="true" output="screen" />
+</launch>
