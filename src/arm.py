@@ -3,6 +3,7 @@
 import rospy
 from std_msgs.msg import Float32MultiArray, String
 from open_manipulator_msgs.srv import SetJointPosition, SetJointPositionRequest
+from carry_my_luggage.msg import ArmAction
 import sys
 import time
 from math import pi
@@ -17,8 +18,7 @@ class Arm():
     def __init__(self):
         rospy.init_node("arm")
 
-        self.joint_sub = rospy.Subscriber("/arm_joint", Float32MultiArray, self.joint_callback)
-        self.gripper_sub = rospy.Subscriber("/arm_gripper", String, self.gripper_callback)
+        self.sub = rospy.Subscriber("/arm", ArmAction, self.callback)
 
         rospy.wait_for_service('/goal_joint_space_path')
         rospy.wait_for_service('/goal_tool_control')
@@ -59,25 +59,9 @@ class Arm():
 
         service(request)
 
-        # time.sleep(3)
-        # rate = rospy.Rate(1)
-        # rate.sleep()
-        # rospy.sleep(3)
-
-    def joint_callback(self, msg):
-        pass
-
-    def gripper_callback(self, msg):
-
-        if msg.data == "open":
-            rospy.loginfo("arm: Openning gripper")
-            self.move_gripper("open")
-        elif msg.data == "close":
-            rospy.loginfo("arm: Closing gripper")
-            self.move_gripper("close")
-        elif msg.data == "init":
-            self.move_gripper("init")
-
+    def callback(self, msg):
+        self.move_arm(msg.joint)
+        self.move_gripper(msg.gripper)
 
 if __name__ == '__main__':
     arm = Arm()

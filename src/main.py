@@ -2,6 +2,7 @@
 
 import rospy
 from std_msgs.msg import Float32MultiArray, String
+from carry_my_luggage.msg import ArmAction
 import time
 import sys
 from math import pi
@@ -13,8 +14,7 @@ class CarryMyLuggage():
         self.move_pub = rospy.Publisher("/move", String, queue_size=1)
 
         # for robot arm manipulation
-        self.arm_joint_pub = rospy.Publisher("/arm_joint", Float32MultiArray, queue_size=1)
-        self.arm_gripper_pub = rospy.Publisher("/arm_gripper", String, queue_size=1)
+        self.arm_pub = rospy.Publisher("/arm", ArmAction, queue_size=1)
 
         # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
@@ -31,6 +31,11 @@ class CarryMyLuggage():
         array = [0, 0, 0, pi / 4]
         self.arm_joint_pub.publish(Float32MultiArray(data=array))
         """
+        # robot arm test
+        armAction = ArmAction()
+        armAction.joint = [0, 0, - pi / 2, 0]
+        armAction.gripper = "open"
+        self.arm_pub.publish(armAction)
 
         time.sleep(3)
         sys.exit(0)

@@ -7,9 +7,10 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
-# add_message_files(
-#   FILES
-# )
+add_message_files(
+  FILES
+  ArmAction.msg
+)
 
 generate_messages(
   DEPENDENCIES
