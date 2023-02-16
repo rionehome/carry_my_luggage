@@ -1,7 +1,8 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import rospy
-from std_msgs.msg import Float32MultiArray, String
+from std_msgs.msg import String
 from carry_my_luggage.msg import ArmAction
 import time
 import sys
@@ -22,15 +23,10 @@ class CarryMyLuggage():
     def main(self):
         # wait for nodes
         time.sleep(3)
-        self.audio_pub.publish("テスト")
-        """
-        self.arm_gripper_pub.publish("init")
-        time.sleep(1)
-        self.arm_gripper_pub.publish("close")
 
-        array = [0, 0, 0, pi / 4]
-        self.arm_joint_pub.publish(Float32MultiArray(data=array))
-        """
+        # audio test
+        self.audio_pub.publish("テスト")
+
         # robot arm test
         armAction = ArmAction()
         armAction.joint = [0, 0, - pi / 2, 0]
