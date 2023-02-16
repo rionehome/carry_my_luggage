@@ -3,33 +3,34 @@
 
 import rospy
 from geometry_msgs.msg import Twist
-from std_msgs.msg import String
+from carry_my_luggage.msg import MoveAction
 import time
 
-LINEAR_SPEED = 1.5 # m/s
+LINEAR_SPEED = 0.15 # m/s
 ANGULAR_SPEED = 0.5 # m/s
 
 class Move():
     def __init__(self):
         self.pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
-        self.sub = rospy.Subscriber("/move", String, self.callback)
+        self.sub = rospy.Subscriber("/move", MoveAction, self.callback)
     
     def callback(self, msg):
         twist = Twist()
 
-        if msg.data == "forward": # go forward
-            twist.linear.x = LINEAR_SPEED
+        if msg.direction == "forward": # go forward
+            twist.linear.x = msg.speed
             twist.angular.z = 0
-        elif msg.data == "right": # turn right
+        elif msg.direction == "right": # turn right
             twist.linear.x = 0
-            twist.angular.z = -1 * ANGULAR_SPEED
-        elif msg.data == "left": # turn left
+            twist.angular.z = -1 * msg.speed
+        elif msg.direction == "left": # turn left
             twist.linear.x = 0
-            twist.angular.z = ANGULAR_SPEED
+            twist.angular.z = msg.speed
 
         start_time = time.time()
+        target_time = msg.time
 
-        while time.time() - start_time < 2:
+        while time.time() - start_time < target_time:
             self.pub.publish(twist)
             rospy.Rate(30).sleep()
 
