@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import rospy
-from std_msgs.msg import Float32MultiArray, String
 from open_manipulator_msgs.srv import SetJointPosition, SetJointPositionRequest
 from carry_my_luggage.msg import ArmAction
 import sys
-import time
 from math import pi
 
 # names of group and joint
@@ -61,8 +59,12 @@ class Arm():
         service(request)
 
     def callback(self, msg):
-        self.move_arm(msg.joint)
-        self.move_gripper(msg.gripper)
+        if msg.time != 0.0:
+            self.move_arm(msg.joint, planning_time=msg.time)
+            self.move_gripper(msg.gripper, planning_time=msg.time)
+        else:
+            self.move_arm(msg.joint)
+            self.move_gripper(msg.gripper)
 
 if __name__ == '__main__':
     arm = Arm()

@@ -29,8 +29,9 @@ class CarryMyLuggage():
 
         # robot arm test
         armAction = ArmAction()
-        armAction.joint = [0, 0, - pi / 2, 0]
+        armAction.joint = [0, pi / 4, 0, 0]
         armAction.gripper = "open"
+        # armAction.time = 6 # オプショナル。大きな角度を移動する場合に指定
         self.arm_pub.publish(armAction)
 
         time.sleep(3)
