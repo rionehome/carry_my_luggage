@@ -3,8 +3,11 @@
 
 import rospy
 from std_msgs.msg import String
-# from ..speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech
-# import出来ない :(
+
+import sys
+sys.path.append('../')
+from speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech
+
 
 class Audio():
     def __init__(self):
