@@ -3,14 +3,14 @@
 
 import rospy
 from std_msgs.msg import String, Float32
-from carry_my_luggage.msg import ArmAction, MoveAction
+from carry_my_luggage.msg import ArmAction, MoveAction, LidarData
 import time
 import sys
 from math import pi
 
 STOP_DISTANCE = 1.0 + 0.15 # m
 LINEAR_SPEED = 0.15 # m/s
-ANGULAR_SPEED = 0.5 # m/s
+ANGULAR_SPEED = 0.75 # m/s
 
 class CarryMyLuggage():
     def __init__(self):
@@ -29,6 +29,41 @@ class CarryMyLuggage():
         time.sleep(3)
 
         # lidar test
+        while True:
+            lidarData = rospy.wait_for_message('/lidar', LidarData)
+            distance = lidarData.distance
+            print(distance)
+            mn = min(distance)
+            mn_index = distance.index(mn)
+            mx = max(distance)
+            mx_index = distance.index(mx)
+            print("min:", mn, mn_index)
+            print("max", mx, mx_index)
+
+            if mn_index > 1 and mn_index < 11:
+                m = MoveAction()
+                m.direction = "left"
+                m.speed = ANGULAR_SPEED
+                m.time = 0.1
+                self.move_pub.publish(m)
+                print("you are atleft")
+            elif mn_index > 11 and mn_index <= 21:
+                m = MoveAction()
+                m.direction = "right"
+                m.speed = ANGULAR_SPEED
+                m.time = 0.1
+                self.move_pub.publish(m)
+                print("you are at right")
+            elif mn > 0.8:
+                m = MoveAction()
+                m.direction = "forward"
+                m.speed = LINEAR_SPEED
+                m.time = 0.1
+                self.move_pub.publish(m)
+                print("please don't leave me~~~")
+
+            
+        exit(0)
         while True:
             distance = rospy.wait_for_message('/lidar', Float32)
 
