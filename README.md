@@ -4,10 +4,21 @@
 
 以下の環境で動くことを想定しています
 
+- Turtlebot 2
+- Rplidar A1
+- Open Manipulator X
 - Ubuntu 18.04
-- Ros melodic
+- ROS Melodic
 
-### open_manipulator
+### Rplidar A1
+
+以下のパッケージのダウンロードとビルド
+
+```
+https://github.com/Slamtec/rplidar_ros
+```
+
+### Open Manipulator X
 
 [詳しくは公式ドキュメントを読もう](https://emanual.robotis.com/docs/en/platform/openmanipulator_x/quick_start_guide/)
 
@@ -33,4 +44,10 @@ U2D2のセットアップ(初めて使う場合)
 ```
 roscore
 rosrun open_manipulator_controller create_udev_rules
+```
+
+### speech_and_NLP
+
+```
+git submodule update --init
 ```
