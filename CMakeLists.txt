@@ -11,6 +11,7 @@ add_message_files(
   FILES
   ArmAction.msg
   MoveAction.msg
+  LidarData.msg
 )
 
 generate_messages(
