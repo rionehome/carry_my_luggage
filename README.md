@@ -18,6 +18,13 @@
 https://github.com/Slamtec/rplidar_ros
 ```
 
+書き込み権限を与える
+
+```
+ls -l /dev/ttyUSB*             # どのデバイスファイルか確認
+sudo chmod /dev/ttyUSB0   # 実行権限を与える
+```
+
 ### Open Manipulator X
 
 [詳しくは公式ドキュメントを読もう](https://emanual.robotis.com/docs/en/platform/openmanipulator_x/quick_start_guide/)
