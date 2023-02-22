@@ -9,7 +9,7 @@
   <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
 
   <node pkg="carry_my_luggage" name="main" type="main.py" required="true" output="screen" />
-  <node pkg="carry_my_luggage" name="move" type="move.py" required="true" output="screen" /> -->
+  <node pkg="carry_my_luggage" name="move" type="move.py" required="true" output="screen" />
   <node pkg="carry_my_luggage" name="arm" type="arm.py" required="true" output="screen" />
   <node pkg="carry_my_luggage" name="audio" type="audio.py" required="true" output="screen" />
   <node pkg="carry_my_luggage" name="lidar" type="lidar.py" required="true" output="screen" />
