@@ -21,8 +21,8 @@ https://github.com/Slamtec/rplidar_ros
 書き込み権限を与える(初めて使う場合)
 
 ```
-ls -l /dev/ttyUSB*        # どのデバイスファイルか確認
-sudo chmod /dev/ttyUSB0   # 実行権限を与える
+ls /dev/ttyUSB*                 # どのデバイスファイルか確認
+sudo chmod 666 /dev/ttyUSB0     # 実行権限を与える
 ```
 
 ### Open Manipulator X
