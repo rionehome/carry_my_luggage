@@ -3,16 +3,20 @@
 
 import rospy
 from std_msgs.msg import String
-# from ..speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech
-# import出来ない :(
+
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech
 
 class Audio():
     def __init__(self):
         self.sub = rospy.Subscriber("/audio", String, self.callback)
     
     def callback(self, msg):
-        # textToSpeech(msg.data)
-        pass
+        textToSpeech(msg.data)
 
 if __name__ == '__main__':
     rospy.init_node("audio")
