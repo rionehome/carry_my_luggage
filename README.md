@@ -57,4 +57,23 @@ rosrun open_manipulator_controller create_udev_rules
 
 ```
 git submodule update --init
+git submodule foreach git pull origin main
+```
++ Ubuntuの場合 
+```
+cd speech_and_NLP
+sh setup.sh
+```
++ 手動でやる場合
+```
+pip install -r requirements.txt
+
+or
+
+pip3 ~~~ 
+```
+
+`cmake ffmpeg mecab libportaudio2` をインストール
+```shell
+sudo apt install cmake ffmpeg mecab libportaudio2 -y
 ```

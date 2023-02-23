@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# import rospy
-# from std_msgs.msg import String
+import rospy
+from std_msgs.msg import String
 
 import sys
 import os
@@ -11,18 +11,16 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech
 
-textToSpeech("test")
-
-# class Audio():
-#     def __init__(self):
-#         self.sub = rospy.Subscriber("/audio", String, self.callback)
+class Audio():
+    def __init__(self):
+        self.sub = rospy.Subscriber("/audio", String, self.callback)
     
-#     def callback(self, msg):
-#         textToSpeech(msg.data)
+    def callback(self, msg):
+        textToSpeech(msg.data)
 
-# if __name__ == '__main__':
-#     rospy.init_node("audio")
-#     audio = Audio()
+if __name__ == '__main__':
+    rospy.init_node("audio")
+    audio = Audio()
     
-#     while not rospy.is_shutdown():
-#         rospy.Rate(10).sleep()
+    while not rospy.is_shutdown():
+        rospy.Rate(10).sleep()
