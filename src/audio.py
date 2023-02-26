@@ -16,7 +16,8 @@ class Audio():
         self.sub = rospy.Subscriber("/audio", String, self.callback)
     
     def callback(self, msg):
-        textToSpeech(msg.data)
+        # textToSpeech(msg.data)]
+        pass
 
 if __name__ == '__main__':
     rospy.init_node("audio")
