@@ -12,7 +12,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 # from speech_and_NLP.src.tools.speech_to_text.speechToText import recognize_speech 
 from speech_and_NLP.src.tools.text_to_speech.textToSpeech import textToSpeech
 
-
 class Audio():
     def __init__(self):
         self.sub = rospy.Subscriber("/audio", String, self.callback)
