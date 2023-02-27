@@ -38,7 +38,7 @@ class Arm():
     def move_gripper(self, action, planning_time=4.0):
         service = rospy.ServiceProxy('/goal_tool_control', SetJointPosition)
         request = SetJointPositionRequest()
-
+        
         # position 0.01 - -0.01
         if action == "open":
             position = [0.007]
@@ -48,7 +48,7 @@ class Arm():
             position = [0.01]
         else:
             sys.exit("You must specify arm's action with open or close")
-      
+
         request.planning_group = gripper_planning_group
         request.joint_position.joint_name = gripper_joint_names
         request.joint_position.position = position

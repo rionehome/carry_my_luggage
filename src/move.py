@@ -17,7 +17,10 @@ class Move():
     def callback(self, msg):
         twist = Twist()
 
-        if msg.direction == "forward": # go forward
+        if msg.direction == "stop":
+            twist.linear.x = 0
+            twist.angular.z = 0
+        elif msg.direction == "forward": # go forward
             twist.linear.x = msg.speed
             twist.angular.z = 0
         elif msg.direction == "right": # turn right
@@ -26,6 +29,17 @@ class Move():
         elif msg.direction == "left": # turn left
             twist.linear.x = 0
             twist.angular.z = msg.speed
+        elif msg.distance == "long":
+            twist.linear.x = msg.speed
+            twist.angular.z = 0
+        elif msg.distance == "short":
+            twist.linear.x = -1 * msg.speed
+            twist.angular.z = 0
+        elif msg.distance == "normal":
+            twist.linear.x = msg.speed
+            twist.angular.z = 0
+        #normalのときは何もしない
+        
 
         start_time = time.time()
         target_time = msg.time
