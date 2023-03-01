@@ -11,7 +11,7 @@ ANGULAR_SPEED = 0.5 # m/s
 
 class Move():
     def __init__(self):
-        self.pub = rospy.Publisher("/mobile_base/commands/velocity", Twist, queue_size=1)
+        self.pub = rospy.Publisher("/cmd_vel_mux/input/teleop", Twist, queue_size=1)
         self.sub = rospy.Subscriber("/move", MoveAction, self.callback)
     
     def callback(self, msg):

@@ -36,6 +36,7 @@ class CarryMyLuggage():
         global_speed = LINEAR_SPEED #対象に合わせて、速度を変える
         global_distance = "normal"
         
+        
         while True:
             #lidar information
             lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
@@ -61,7 +62,12 @@ class CarryMyLuggage():
             c.speed = 0.0
             #c.direction = "normal"
             
+            good = 0
+            
             if mn < 0.3:#止まる（Turtlebotからの距離が近い）
+                if good == 1:
+                    self.audio_pub.publish("あーむうごかしまああす")
+                    break
                 if global_direction != "stop":
                     print("I can get close here")
                     self.audio_pub.publish("これ以上近づけません")
@@ -109,9 +115,10 @@ class CarryMyLuggage():
                         global_distance = "normal"
                     c.distance = "normal"
                     c.speed = global_speed
+                    good = 1
                 
             self.move_pub.publish(c)
-            
+            exit(0)
             """exit(0)
             if msg.robo_p_drct == 0:
                 c.direction = "left"
@@ -167,7 +174,7 @@ class CarryMyLuggage():
                 
             self.audio_pub.publish("テストしていますよーーー")
             personData = rospy.Subscriber("/person", PersonDetect)
-"""
+
             
         exit(0)
         while True:
@@ -193,25 +200,13 @@ class CarryMyLuggage():
         # audio test
         self.audio_pub.publish("テスト")
 
-        # robot arm test
-        armAction = ArmAction()
-        armAction.joint = [0, pi / 4, 0, 0]
-        armAction.gripper = "open"
-        # armAction.time = 6 # オプショナル。大きな角度を移動する場合に指定
-        self.arm_pub.publish(armAction)
-
+    
         time.sleep(3)
         sys.exit(0)
         
         exit(0)
-        # robot arm test
-        armAction = ArmAction()
-        armAction.joint = [2/(3 * pi), 2/(3*pi), 2/(3*pi), 2/(3*pi)]
-        armAction.gripper = "open"
-        # armAction.time = 6 # オプショナル。大きな角度を移動する場合に指定
-        carryMyLuggage.arm_pub.publish(armAction)
-        armAction.joint = [2/(5 * pi), 2/(5*pi), 2/(5*pi), 2/(5*pi)]
-        carryMyLuggage.arm_pub.publish(armAction)
+"""
+        
 
             
                 

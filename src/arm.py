@@ -41,7 +41,7 @@ class Arm():
         
         # position 0.01 - -0.01
         if action == "open":
-            position = [0.007]
+            position = [0.01]
         elif action == "close":
             position = [-0.007]
         elif action == "init":
