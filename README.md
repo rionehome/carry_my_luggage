@@ -18,6 +18,13 @@
 https://github.com/Slamtec/rplidar_ros
 ```
 
+書き込み権限を与える(初めて使う場合)
+
+```
+ls /dev/ttyUSB*                 # どのデバイスファイルか確認
+sudo chmod 666 /dev/ttyUSB0     # 実行権限を与える
+```
+
 ### Open Manipulator X
 
 [詳しくは公式ドキュメントを読もう](https://emanual.robotis.com/docs/en/platform/openmanipulator_x/quick_start_guide/)
@@ -50,4 +57,23 @@ rosrun open_manipulator_controller create_udev_rules
 
 ```
 git submodule update --init
+git submodule foreach git pull origin main
+```
++ Ubuntuの場合 
+```
+cd speech_and_NLP
+sh setup.sh
+```
++ 手動でやる場合
+```
+pip install -r requirements.txt
+
+or
+
+pip3 ~~~ 
+```
+
+`cmake ffmpeg mecab libportaudio2` をインストール
+```shell
+sudo apt install cmake ffmpeg mecab libportaudio2 -y
 ```

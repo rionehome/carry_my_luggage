@@ -12,6 +12,7 @@ add_message_files(
   ArmAction.msg
   MoveAction.msg
   LidarData.msg
+  PersonDetect.msg
 )
 
 generate_messages(
