@@ -55,62 +55,68 @@ class CarryMyLuggage():
             p_direction = detectData.robo_p_drct
             p_distance = detectData.robo_p_dis
             
-            #command select
+            #command select^
             c = MoveAction()
-            #c.distance = "forward"
+            c.distance = "forward"
+            c.direction = "stop"
+            c.distance = "normal"
             c.time = 0.1
             c.linear_speed = 0.0
             c.angle_speed = 0.0
-            #c.direction = "normal"
+            c.direction = "normal"
             
             if mn < 0.35:#止まる（Turtlebotからの距離が近い）
                 if global_direction != "stop":
                     print("I can get close here")
                     self.audio_pub.publish("これ以上近づけません")
                     global_direction = "stop" 
-                # c.direction = "stop"
+                c.direction = "stop"
+                c.angle_speed = 0.0
+                pass
                 #止まることを最優先するため、初期値で設定している
             elif p_direction == 0:
                 if global_direction != "left":
                     print("you are left side so I turn left")
                     self.audio_pub.publish("たーんれふと")
                     global_direction = "left"
-                # c.direction = "left"
+                c.direction = "left"
                 c.angle_speed = ANGULAR_SPEED
             elif p_direction == 2:
                 if global_direction != "right":
                     print("you are right side so I turn right")
                     self.audio_pub.publish("たーんらいと")
                     global_direction = "right"
-                # c.direction = "right"
+                c.direction = "right"
                 c.angle_speed = ANGULAR_SPEED
             elif p_direction== 1:
                 if global_direction != "forward":
                     print("you are good")
                     self.audio_pub.publish("いいね")
                     global_direction = "forward"
-                # c.direction = "forward"
-                
-            if p_distance == 0:
+                c.direction = "forward"
+            
+            if mn < 0.35:
+                c.linear_speed = 0.0
+            elif p_distance == 0:
                 if global_distance != "long":
                     self.audio_pub.publish("かくどはいいが、きょりがとおい")
                     print("angle but you have long distance.")
                     global_distance = "long"
-                # c.distance = "long"
+                c.distance = "long"
                 c.linear_speed = global_linear_speed * 1.1
             elif p_distance == 2:
                 if global_distance != "short":
                     self.audio_pub.publish("かくどはいいが、きょりがちかい")
                     print("angle but you have short distance.")
                     global_distance = "short"
-                # c.distance = "short"
+                c.distance = "short"
                 c.linear_speed = global_linear_speed * 1.1
             elif p_distance == 1:
                 if global_distance != "normal":
                     self.audio_pub.publish("かくどもきょりもいいかんじ")
                     print("angle and distance.")
                     global_distance = "normal"
-                # c.distance = "normal"
+                c.distance = "normal"
                 c.linear_speed = global_linear_speed
                 
             self.move_pub.publish(c)

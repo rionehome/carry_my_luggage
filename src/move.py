@@ -18,7 +18,10 @@ class Move():
         twist = Twist()
 
         twist.linear.x = msg.linear_speed
-        twist.angular.z = msg.angle_speed
+        if msg.direction == "left":
+            twist.angular.z = msg.angle_speed
+        elif msg.direction == "right":
+            twist.angular.z = - 1 * msg.angle_speed
         # if msg.direction == "stop":
         #     twist.linear.x = 0
         #     twist.angular.z = 0
