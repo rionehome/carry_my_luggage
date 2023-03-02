@@ -4,21 +4,15 @@
 import rospy
 from std_msgs.msg import String, Float32
 from carry_my_luggage.msg import ArmAction, MoveAction, LidarData, PersonDetect
+from carry_my_luggage.srv import Camera_msg
 import time
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from math import pi
-# from hand_detect.finger_direction import get_direction
 
 STOP_DISTANCE = 1.0 + 0.15 # m
 LINEAR_SPEED = 0.15 # m/s
-ANGULAR_SPEED = 0.75 # m/s
-
-
-
-
-
+ANGULAR_SPEED = 0.75  # m/s
 
 class CarryMyLuggage():
     def __init__(self):
@@ -31,6 +25,9 @@ class CarryMyLuggage():
 
         # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
+
+        # for camera
+        self.camera_ser = rospy.ServiceProxy("/camera", Camera_msg)
         
         #self.sub = rospy.Subscriber("/person", PersonDetect, self.callback)
         
@@ -39,42 +36,46 @@ class CarryMyLuggage():
         global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
         global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
         global_distance = "normal"
-        print("go_near Function is runnning")
-        #lidar information
-        lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
-        distance = lidarData.distance
-        print(distance)
-        mn = min(distance)
-        mn_index = distance.index(mn)
-        mx = max(distance)
-        mx_index = distance.index(mx)
-        print("min:", mn, mn_index)
-        print("max", mx, mx_index)
         #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
         
         #Yolo information
-        detectData = rospy.wait_for_message('/person', PersonDetect)
-        p_direction = detectData.robo_p_drct
-        p_distance = detectData.robo_p_dis
-        
-        #command select^
-        c = MoveAction()
-        c.distance = "forward"
-        c.direction = "stop"
-        c.distance = "normal"
-        c.time = 0.1
-        c.linear_speed = 0.0
-        c.angle_speed = 0.0
-        c.direction = "normal"
         while True:
-            if mn < 0.35:#止まる（Turtlebotからの距離が近い）
+            print("go_near Function is runnning")
+            #lidar information
+            lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
+            distance = lidarData.distance
+            print(distance)
+            mn = min(distance)
+            mn_index = distance.index(mn)
+            mx = max(distance)
+
+            mx_index = distance.index(mx)
+            print("min:", mn, mn_index)
+            print("max", mx, mx_index)
+            detectData = rospy.wait_for_message('/person', PersonDetect)
+            p_direction = detectData.robo_p_drct
+            p_distance = detectData.robo_p_dis
+            
+            #command select^
+            c = MoveAction()
+            c.distance = "forward"
+            c.direction = "stop"
+            c.distance = "normal"
+            c.time = 0.1
+            c.linear_speed = 0.0
+            c.angle_speed = 0.0
+            c.direction = "normal"
+            if mn < 1.0:#止まる（Turtlebotからの距離が近い）
                 if global_direction != "stop":
                     print("I can get close here")
                     self.audio_pub.publish("これ以上近づけません")
+                    time.sleep(2)
                     global_direction = "stop" 
                     break
                 c.direction = "stop"
                 c.angle_speed = 0.0
+                c.linear_speed = 0.0
+                c.distance = "long"
                 
                 
                 #止まることを最優先するため、初期値で設定している
@@ -84,14 +85,14 @@ class CarryMyLuggage():
                     self.audio_pub.publish("たーんれふと")
                     global_direction = "left"
                 c.direction = "left"
-                c.angle_speed = ANGULAR_SPEED
+                c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
             elif p_direction == 2:
                 if global_direction != "right":
                     print("you are right side so I turn right")
                     self.audio_pub.publish("たーんらいと")
                     global_direction = "right"
                 c.direction = "right"
-                c.angle_speed = ANGULAR_SPEED
+                c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
             elif p_direction== 1:
                 if global_direction != "forward":
                     print("you are good")
@@ -99,42 +100,59 @@ class CarryMyLuggage():
                     global_direction = "forward"
                 c.direction = "forward"
 
-            if mn < 0.35:
+            if mn < 1.0:
                 c.linear_speed = 0.0
+
             elif p_distance == 0:
                 if global_distance != "long":
                     self.audio_pub.publish("かくどはいいが、きょりがとおい")
                     print("angle but you have long distance.")
                     global_distance = "long"
                 c.distance = "long"
-                global_linear_speed = global_linear_speed * 1.25
+                if global_linear_speed < 0.5:
+                    global_linear_speed += 0.07
+                if global_linear_speed < 1:
+                    global_linear_speed += 0.02
                 c.linear_speed = global_linear_speed
+                print(c.linear_speed)
+
             elif p_distance == 2:
                 if global_distance != "short":
                     self.audio_pub.publish("かくどはいいが、きょりがちかい")
                     print("angle but you have short distance.")
                     global_distance = "short"
                 c.distance = "short"
-                global_linear_speed = global_linear_speed * 1.25
-                c.linear_speed = global_linear_speed
+                global_linear_speed = 0.1
+                # if global_linear_speed >= 0.1:
+                    # global_linear_speed -= 0.7
+                c.linear_speed = 0.05
+                print(c.linear_speed)
+                self.audio_pub.publish("あああああああ")
+
             elif p_distance == 1:
                 if global_distance != "normal":
                     self.audio_pub.publish("かくどもきょりもいいかんじ")
                     print("angle and distance.")
                     global_distance = "normal"
                 c.distance = "normal"
+                if global_linear_speed >= LINEAR_SPEED:
+                    global_linear_speed -= 0.05
                 c.linear_speed = global_linear_speed
+                print(c.linear_speed)
 
-        self.move_pub.publish(c)
+            print("GLOBAL LINEAR : " + str(global_linear_speed))
+            self.move_pub.publish(c)
     
     def main(self):
         # wait for nodes
         time.sleep(3)
 
         # OPに近づく（fingerで角度を識別でできる距離まで）
-        self.go_near()
-        #fingerDirection =  get_direction(5)
-        #print(fingerDirection)
+        # self.go_near()
+        # print("終了しました")
+        rospy.wait_for_service("/camera")
+        fingerDirection = self.camera_ser("finger", 5)
+        print(fingerDirection.res)
         
         # OPが指差したカバンを探す
         

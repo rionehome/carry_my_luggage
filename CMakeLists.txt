@@ -15,6 +15,11 @@ add_message_files(
   PersonDetect.msg
 )
 
+add_service_files(
+  FILES
+  Camera_msg.srv
+)
+
 generate_messages(
   DEPENDENCIES
   std_msgs
