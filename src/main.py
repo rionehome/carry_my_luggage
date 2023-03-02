@@ -15,10 +15,7 @@ STOP_DISTANCE = 1.0 + 0.15 # m
 LINEAR_SPEED = 0.15 # m/s
 ANGULAR_SPEED = 0.75 # m/s
 
-global_direction = "forward"
-global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
-global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
-global_distance = "normal"
+
 
 
 
@@ -38,6 +35,10 @@ class CarryMyLuggage():
         #self.sub = rospy.Subscriber("/person", PersonDetect, self.callback)
         
     def go_near(self):
+        global_direction = "forward"
+        global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
+        global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
+        global_distance = "normal"
         print("go_near Function is runnning")
         #lidar information
         lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
