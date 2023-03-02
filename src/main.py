@@ -103,14 +103,16 @@ class CarryMyLuggage():
                     print("angle but you have long distance.")
                     global_distance = "long"
                 c.distance = "long"
-                c.linear_speed = global_linear_speed * 1.1
+                global_linear_speed = global_linear_speed * 1.25
+                c.linear_speed = global_linear_speed
             elif p_distance == 2:
                 if global_distance != "short":
                     self.audio_pub.publish("かくどはいいが、きょりがちかい")
                     print("angle but you have short distance.")
                     global_distance = "short"
                 c.distance = "short"
-                c.linear_speed = global_linear_speed * 1.1
+                global_linear_speed = global_linear_speed * 1.25
+                c.linear_speed = global_linear_speed
             elif p_distance == 1:
                 if global_distance != "normal":
                     self.audio_pub.publish("かくどもきょりもいいかんじ")
