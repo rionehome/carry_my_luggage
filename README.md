@@ -40,10 +40,10 @@ sudo apt-get install ros-melodic-robotis-manipulator
 以下のパッケージのダウンロードとビルド
 
 ```
-https://github.com/ROBOTIS-GIT/open_manipulator.git
-https://github.com/ROBOTIS-GIT/open_manipulator_msgs.git
-https://github.com/ROBOTIS-GIT/open_manipulator_simulations.git
-https://github.com/ROBOTIS-GIT/open_manipulator_dependencies.git
+git clone https://github.com/ROBOTIS-GIT/open_manipulator.git
+git clone https://github.com/ROBOTIS-GIT/open_manipulator_msgs.git
+git clone https://github.com/ROBOTIS-GIT/open_manipulator_simulations.git
+git clone https://github.com/ROBOTIS-GIT/open_manipulator_dependencies.git
 ```
 
 U2D2のセットアップ(初めて使う場合)
@@ -51,6 +51,11 @@ U2D2のセットアップ(初めて使う場合)
 ```
 roscore
 rosrun open_manipulator_controller create_udev_rules
+```
+
+### catkin_make の cmake エラー
+```
+rosdep install -r --from-path src --ignore-src
 ```
 
 ### speech_and_NLP
@@ -73,7 +78,7 @@ or
 pip3 ~~~ 
 ```
 
-`cmake ffmpeg mecab libportaudio2` をインストール
+`cmake ffmpeg mecab libportaudio2 python-pyaudio` をインストール
 ```shell
-sudo apt install cmake ffmpeg mecab libportaudio2 -y
+sudo apt install cmake ffmpeg python-pyaudio mecab libportaudio2 -y
 ```

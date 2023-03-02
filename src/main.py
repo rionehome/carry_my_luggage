@@ -6,11 +6,20 @@ from std_msgs.msg import String, Float32
 from carry_my_luggage.msg import ArmAction, MoveAction, LidarData, PersonDetect
 import time
 import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from math import pi
+# from hand_detect.finger_direction import get_direction
 
 STOP_DISTANCE = 1.0 + 0.15 # m
 LINEAR_SPEED = 0.15 # m/s
 ANGULAR_SPEED = 0.75 # m/s
+
+global_direction = "forward"
+global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
+global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
+global_distance = "normal"
+
 
 
 
@@ -27,46 +36,46 @@ class CarryMyLuggage():
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
         
         #self.sub = rospy.Subscriber("/person", PersonDetect, self.callback)
-    
-    def main(self):
-        # wait for nodes
-        time.sleep(3)
-
-        global_direction = "forward"
-        global_speed = LINEAR_SPEED #対象に合わせて、速度を変える
-        global_distance = "normal"
         
+    def go_near(self):
+        print("go_near Function is runnning")
+        #lidar information
+        lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
+        distance = lidarData.distance
+        print(distance)
+        mn = min(distance)
+        mn_index = distance.index(mn)
+        mx = max(distance)
+        mx_index = distance.index(mx)
+        print("min:", mn, mn_index)
+        print("max", mx, mx_index)
+        #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
+        
+        #Yolo information
+        detectData = rospy.wait_for_message('/person', PersonDetect)
+        p_direction = detectData.robo_p_drct
+        p_distance = detectData.robo_p_dis
+        
+        #command select^
+        c = MoveAction()
+        c.distance = "forward"
+        c.direction = "stop"
+        c.distance = "normal"
+        c.time = 0.1
+        c.linear_speed = 0.0
+        c.angle_speed = 0.0
+        c.direction = "normal"
         while True:
-            #lidar information
-            lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
-            distance = lidarData.distance
-            print(distance)
-            mn = min(distance)
-            mn_index = distance.index(mn)
-            mx = max(distance)
-            mx_index = distance.index(mx)
-            print("min:", mn, mn_index)
-            print("max", mx, mx_index)
-            #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
-            
-            #Yolo information
-            detectData = rospy.wait_for_message('/person', PersonDetect)
-            p_direction = detectData.robo_p_drct
-            p_distance = detectData.robo_p_dis
-            
-            #command select
-            c = MoveAction()
-            #c.distance = "forward"
-            c.time = 0.1
-            c.speed = 0.0
-            #c.direction = "normal"
-            
-            if mn < 0.3:#止まる（Turtlebotからの距離が近い）
+            if mn < 0.35:#止まる（Turtlebotからの距離が近い）
                 if global_direction != "stop":
                     print("I can get close here")
                     self.audio_pub.publish("これ以上近づけません")
                     global_direction = "stop" 
+                    break
                 c.direction = "stop"
+                c.angle_speed = 0.0
+                
+                
                 #止まることを最優先するため、初期値で設定している
             elif p_direction == 0:
                 if global_direction != "left":
@@ -74,74 +83,87 @@ class CarryMyLuggage():
                     self.audio_pub.publish("たーんれふと")
                     global_direction = "left"
                 c.direction = "left"
-                c.speed = ANGULAR_SPEED
+                c.angle_speed = ANGULAR_SPEED
             elif p_direction == 2:
                 if global_direction != "right":
                     print("you are right side so I turn right")
                     self.audio_pub.publish("たーんらいと")
                     global_direction = "right"
                 c.direction = "right"
-                c.speed = ANGULAR_SPEED
+                c.angle_speed = ANGULAR_SPEED
             elif p_direction== 1:
                 if global_direction != "forward":
                     print("you are good")
-                    self.audio_pub.publish("いいね")
+                    self.audio_pub.publish("かくどいいね")
                     global_direction = "forward"
                 c.direction = "forward"
-                if p_distance == 0:
-                    if global_distance != "long":
-                        self.audio_pub.publish("かくどはいいけどきょりがとおい")
-                        print("angle but you have long distance.")
-                        global_distance = "long"
-                    c.distance = "long"
-                    c.speed = global_speed * 1.1
-                elif p_distance == 2:
-                    if global_distance != "short":
-                        self.audio_pub.publish("かくどはいいけどきょりがちかい")
-                        print("angle but you have short distance.")
-                        global_distance = "short"
-                    c.distance = "short"
-                    c.speed = global_speed * 1.1
-                elif p_distance == 1:
-                    if global_distance != "normal":
-                        self.audio_pub.publish("かくどもきょりもいいかんじ")
-                        print("angle and distance.")
-                        global_distance = "normal"
-                    c.distance = "normal"
-                    c.speed = global_speed
-                
-            self.move_pub.publish(c)
-            
-            """exit(0)
-            if msg.robo_p_drct == 0:
-                c.direction = "left"
-                c.speed = ANGULAR_SPEED*0.5
-                print("you are left side so I turned left")
-            elif msg.robo_p_drct == 1:
-                c.direction = "forward"
-                c.speed = LINEAR_SPEED*1.5
-                print("you are good angle")
-            elif msg.robo_p_drct == 2:
-                c.direction = "right"
-                c.speed = ANGULAR_SPEED*0.5
-                print("you are right side so I turn right")
-            elif msg.robo_p_dis == 0:
+
+            if mn < 0.35:
+                c.linear_speed = 0.0
+            elif p_distance == 0:
+                if global_distance != "long":
+                    self.audio_pub.publish("かくどはいいが、きょりがとおい")
+                    print("angle but you have long distance.")
+                    global_distance = "long"
                 c.distance = "long"
-                c.speed = LINEAR_SPEED * 1.5
-                print("you have long distance")
-            #距離が普通の場合、今の速度をキープするようにする
-            elif msg.robo_p_dis == 1:
-                c.distance = "normal"
-                c.speed = LINEAR_SPEED
-                print("distance is normal!")
-            #距離が短い場合、スピードが０の場合、離れるようにする
-            #距離が短い場合、スピードがある場合、速度を遅くする
-            elif msg.robo_p_dis == 2:
+                global_linear_speed = global_linear_speed * 1.25
+                c.linear_speed = global_linear_speed
+            elif p_distance == 2:
+                if global_distance != "short":
+                    self.audio_pub.publish("かくどはいいが、きょりがちかい")
+                    print("angle but you have short distance.")
+                    global_distance = "short"
                 c.distance = "short"
-                c.speed = -LINEAR_SPEED*1.5
-                print("you have short distance")
-                
-            self.move_pub.publish(c)
+                global_linear_speed = global_linear_speed * 1.25
+                c.linear_speed = global_linear_speed
+            elif p_distance == 1:
+                if global_distance != "normal":
+                    self.audio_pub.publish("かくどもきょりもいいかんじ")
+                    print("angle and distance.")
+                    global_distance = "normal"
+                c.distance = "normal"
+                c.linear_speed = global_linear_speed
+
+        self.move_pub.publish(c)
+    
+    def main(self):
+        # wait for nodes
+        time.sleep(3)
+
+        # OPに近づく（fingerで角度を識別でできる距離まで）
+        self.go_near()
+        #fingerDirection =  get_direction(5)
+        #print(fingerDirection)
+        
+        # OPが指差したカバンを探す
+        
+        
+        # カバンの前まで移動
+        
+        
+        # カバンをつかむ
+        
+        
+        # OPに向かって進む（アリーナの外に出るため壁が近くてもぶつから内容に移動できなければならない）
+        
+        
+        # OPが車に向かって移動するので、ついていく
+        
+
+        # カバンを渡す
+        
+        
+        # スタート位置に戻る
+        
+        
+        # プログラムを終了する
+        
+            
+            
+
+            
+            
+"""
             exit(0)
             if mn_index > 1 and mn_index < 11:
                 m = MoveAction()
@@ -167,7 +189,7 @@ class CarryMyLuggage():
                 
             self.audio_pub.publish("テストしていますよーーー")
             personData = rospy.Subscriber("/person", PersonDetect)
-"""
+
             
         exit(0)
         while True:
@@ -203,17 +225,6 @@ class CarryMyLuggage():
         time.sleep(3)
         sys.exit(0)
         
-        exit(0)
-        # robot arm test
-        armAction = ArmAction()
-        armAction.joint = [2/(3 * pi), 2/(3*pi), 2/(3*pi), 2/(3*pi)]
-        armAction.gripper = "open"
-        # armAction.time = 6 # オプショナル。大きな角度を移動する場合に指定
-        carryMyLuggage.arm_pub.publish(armAction)
-        armAction.joint = [2/(5 * pi), 2/(5*pi), 2/(5*pi), 2/(5*pi)]
-        carryMyLuggage.arm_pub.publish(armAction)
-
-            
                 
     def armfinishmove(self):
         armAction = ArmAction()
@@ -226,50 +237,7 @@ class CarryMyLuggage():
         armAction.gripper = "close"
         armAction.time = 6
         carryMyLuggage.arm_pub.publish(armAction)
-
-        """        
-        def callback(self, msg):
-                    
-                #＜とりあえず書いてみてほしいと言われたものを書いてみる＞
-
-                #人の距離（遠い・中くらい・近い）の３段階のデータが送られてくるので、
-                #それに対応して、行動するような動きをするもの
-                #距離が遠い時に、スピードが０ならば、発進するようにする距離が遠くて、スピードがあるならば、速度を上げるようにする
-            
-            c = MoveAction()
-            c.time = 0.01
-            c.speed = 0 #なんとなく値を初期化
-            
-            if msg.robo_p_drct == 0:
-                c.direction = "left"
-                c.speed = ANGULAR_SPEED*0.5
-                print("you are left side so I turned left")
-            elif msg.robo_p_drct == 1:
-                c.direction = "forward"
-                c.speed = LINEAR_SPEED*1.5
-                print("you are good angle")
-            elif msg.robo_p_drct == 2:
-                c.direction = "right"
-                c.speed = ANGULAR_SPEED*0.5
-                print("you are right side so I turn right")
-            elif msg.robo_p_dis == 0:
-                c.distance = "long"
-                c.speed = LINEAR_SPEED * 1.5
-                print("you have long distance")
-            #距離が普通の場合、今の速度をキープするようにする
-            elif msg.robo_p_dis == 1:
-                c.distance = "normal"
-                c.speed = LINEAR_SPEED
-                print("distance is normal!")
-            #距離が短い場合、スピードが０の場合、離れるようにする
-            #距離が短い場合、スピードがある場合、速度を遅くする
-            elif msg.robo_p_dis == 2:
-                c.distance = "short"
-                c.speed = -LINEAR_SPEED*1.5
-                print("you have short distance")
-                
-            self.move_pub.publish(c)
-            """
+"""
 
 
 if __name__ == '__main__':
