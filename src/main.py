@@ -3,8 +3,8 @@
 
 import rospy
 from std_msgs.msg import String, Float32
-from carry_my_luggage.msg import ArmAction, MoveAction, LidarData, PersonDetect
-from carry_my_luggage.srv import Camera_msg
+from carry_my_luggage.msg import MoveAction, LidarData, PersonDetect
+from carry_my_luggage.srv import Camera_msg, MoveArm
 import time
 import sys
 import os
@@ -21,8 +21,8 @@ class CarryMyLuggage():
         self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
         # for robot arm manipulation
-        self.arm_pub = rospy.Publisher("/arm", ArmAction, queue_size=1)
-
+        rospy.wait_for_service("/move_arm")
+        
         # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
 
@@ -147,6 +147,11 @@ class CarryMyLuggage():
         # wait for nodes
         time.sleep(3)
 
+        ser = rospy.ServiceProxy("move_arm", MoveArm)
+        #/ 初期位置 #/←このマークをarmの行動とする
+        res = ser(0, 0, 0, 0)
+        print(res.res)
+
         # OPに近づく（fingerで角度を識別でできる距離まで）
         # self.go_near()
         # print("終了しました")
@@ -161,7 +166,25 @@ class CarryMyLuggage():
         
         
         # カバンをつかむ
-        
+        #/ じゅんびして〜
+        res = ser(23, 5, 10, 4)
+        print(res.res)
+
+        #/ のばしてぇーの〜
+        res = ser(35, 7, 10, 4)
+        print(res.res)
+
+        #/ とじるっ！
+        res = ser(35, 7, 10, 2)
+        print(res.res)
+
+        #/ ひっかける！
+        res = ser(37, 7, 30, 2)
+        print(res.res)
+
+        #/ もちあげてからの〜
+        res = ser(30, 20, 30, 2)
+        print(res.res)
         
         # OPに向かって進む（アリーナの外に出るため壁が近くてもぶつから内容に移動できなければならない）
         
@@ -170,7 +193,17 @@ class CarryMyLuggage():
         
 
         # カバンを渡す
-        
+        # おろす
+        res = ser(35, 7, 10, 2)
+        print(res.res)
+
+        # ほんではなす
+        res = ser(35, 7, 10, 4)
+        print(res.res)
+
+        # 初期位置
+        res = ser(0, 0, 0, 0)
+        print(res.res)
         
         # スタート位置に戻る
         
@@ -231,40 +264,18 @@ class CarryMyLuggage():
 
         exit(0)
 
-        # audio test
-        self.audio_pub.publish("テスト")
-
-        # robot arm test
-        armAction = ArmAction()
-        armAction.joint = [0, pi / 4, 0, 0]
-        armAction.gripper = "open"
-        # armAction.time = 6 # オプショナル。大きな角度を移動する場合に指定
-        self.arm_pub.publish(armAction)
-
-        time.sleep(3)
-        sys.exit(0)
-        
-                
-    def armfinishmove(self):
-        armAction = ArmAction()
-        armAction.joint = [2/(3 * pi), 2/(3*pi), 2/(3*pi), 2/(3*pi)]
-        armAction.gripper = "open"
-        armAction.time = 0
-        carryMyLuggage.arm_pub.publish(armAction)
-        # armAction.time = 6 # オプショナル。大きな角度を移動する場合に指定
-        armAction.joint = [2/(5 * pi), 2/(5*pi), 2/(5*pi), 2/(5*pi)]
-        armAction.gripper = "close"
-        armAction.time = 6
-        carryMyLuggage.arm_pub.publish(armAction)
 """
 
 
 if __name__ == '__main__':
     carryMyLuggage = CarryMyLuggage()
-    
-    # try:
     carryMyLuggage.main()
-        
-    # except KeyboardInterrupt: #ctrl+cの時に、行う処理
-    #     carryMyLuggage.armfinishmove()
-    #     raise
+    
+    
+    # MoveArm
+    # MoveArm.x: 目標座標のx(cm)
+    # MoveArm.y: 目標座標のy(cm)
+    # MoveArm.dig: 手先の角度(度)
+    # MoveArm.grip: 握り具合0〜4の整数値, 0->close, 4->open
+    # 
+    # MoveArm.res: rosserviceの戻り値, 0->正常終了, -1->エラー終了

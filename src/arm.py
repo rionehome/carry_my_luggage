@@ -40,14 +40,18 @@ class Arm():
         request = SetJointPositionRequest()
         
         # position 0.01 - -0.01
-        if action == "open":
-            position = [0.007]
-        elif action == "close":
-            position = [-0.007]
-        elif action == "init":
+        if action == 0:
+            position = [-0.01]
+        elif action == 1:
+            position = [-0.005]
+        elif action == 2:
+            position = [0]
+        elif action == 3:
+            position = [0.005]
+        elif action == 4:
             position = [0.01]
         else:
-            sys.exit("You must specify arm's action with open or close")
+            sys.exit("You must specify arm's action with 0-4")
 
         request.planning_group = gripper_planning_group
         request.joint_position.joint_name = gripper_joint_names

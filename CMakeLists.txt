@@ -10,14 +10,15 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   ArmAction.msg
-  MoveAction.msg
   LidarData.msg
+  MoveAction.msg
   PersonDetect.msg
 )
 
 add_service_files(
   FILES
   Camera_msg.srv
+  MoveArm.srv
 )
 
 generate_messages(
