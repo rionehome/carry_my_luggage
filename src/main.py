@@ -4,6 +4,8 @@
 import rospy
 from std_msgs.msg import String, Float32
 from carry_my_luggage.msg import ArmAction, MoveAction, LidarData, PersonDetect
+from carry_my_luggage.srv import SpeechToText, isMeaning
+
 import time
 import sys
 from math import pi
@@ -25,6 +27,14 @@ class CarryMyLuggage():
 
         # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
+
+        # for speechToText
+
+        self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
+
+        # for isMeaning
+
+        self.isMeaning = rospy.ServiceProxy("/isMeaning", isMeaning )
         
         #self.sub = rospy.Subscriber("/person", PersonDetect, self.callback)
     
@@ -122,8 +132,16 @@ class CarryMyLuggage():
                 c.linear_speed = global_linear_speed
                 
             self.move_pub.publish(c)
+
+        rospy.wait_for_service("/speechToText")
+        text = self.speechToText(False, 20, True, True, -1)
+        print(text.res)
             
+        rospy.wait_for_service("/isMeaning")
+        res = self.isMeaning("ものをもってきてください。", ["とる"])
+        print(res.res)
 """
+
             exit(0)
             if mn_index > 1 and mn_index < 11:
                 m = MoveAction()

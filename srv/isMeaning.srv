@@ -1,0 +1,4 @@
+string text
+string[] word_list
+---
+bool res
