@@ -18,7 +18,7 @@ ANGULAR_SPEED = 0.75  # m/s
 reach_near_car = False
 class CarryMyLuggage():
     def __init__(self):
-        rospy.init_node("main")426f8c5b8a23b9392a1040456f0db5f194816966 
+        rospy.init_node("main")
         # for robot movement
         self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
@@ -39,7 +39,7 @@ class CarryMyLuggage():
         
         #self.sub = rospy.Subscriber("/person", PersonDetect, self.callback)
         
-    def go_near(self):
+    def go_near(self, move_mode, approach_distance):
         global_direction = "forward"
         global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
         global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも

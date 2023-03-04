@@ -67,7 +67,7 @@ class Lidar():
             direction = self.get_direction(l.distance)
             l.front_back = direction[0]
             l.left_right = direction[1]
-            print(direction)
+            # print(direction)
             self.pub.publish(l)
             rospy.Rate(10).sleep()
 
