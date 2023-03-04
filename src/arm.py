@@ -40,13 +40,6 @@ class Arm():
         request = SetJointPositionRequest()
         
         # position 0.01 - -0.01
-<<<<<<< HEAD
-        if action == "open":
-            position = [0.01]
-        elif action == "close":
-            position = [-0.007]
-        elif action == "init":
-=======
         if action == 0:
             position = [-0.01]
         elif action == 1:
@@ -56,7 +49,6 @@ class Arm():
         elif action == 3:
             position = [0.005]
         elif action == 4:
->>>>>>> 0f8df1685fe04b3baf7dc0b8428dd9106eab0662
             position = [0.01]
         else:
             sys.exit("You must specify arm's action with 0-4")
