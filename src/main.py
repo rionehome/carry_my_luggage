@@ -4,7 +4,7 @@
 import rospy
 from std_msgs.msg import String, Float32
 from carry_my_luggage.msg import MoveAction, LidarData, PersonDetect
-from carry_my_luggage.srv import Camera_msg, MoveArm,SpeechToText, isMeaning
+from carry_my_luggage.srv import Camera_msg, MoveArm, SpeechToText, isMeaning
 
 import time
 import sys
@@ -23,7 +23,7 @@ class CarryMyLuggage():
         self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
         # for robot arm manipulation
-        rospy.wait_for_message("/move_arm")
+        rospy.wait_for_service("/move_arm")
         # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
 
@@ -51,11 +51,12 @@ class CarryMyLuggage():
             print("go_near Function is runnning")
             
             if reach_near_car == True: #Trueのとき、この関数を終了する
-                return
+                break
             
             #lidar information
             lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
             distance = lidarData.distance
+            print(lidarData)
             print(distance)
             mn = min(distance)
             mn_index = distance.index(mn)
@@ -164,6 +165,8 @@ class CarryMyLuggage():
     def main(self): #@←これをまだできていないコードの部分のチェックマークとする
         # wait for nodes
         time.sleep(3)
+        self.audio_pub.publish("メインかんすうをじっこうちゅう")
+        print("音声を実行しました。")
 
         ser = rospy.ServiceProxy("move_arm", MoveArm)
         #/ 初期位置 #/←このマークをarmの行動とする
@@ -175,18 +178,24 @@ class CarryMyLuggage():
         self.go_near(move_mode="front", approach_distance=1.0) #move_modeは正面をTurtlebotのどちらにするか, approach_distanceは最終的に止まる距離を示す
 
         #approach_distanceを指を認識できる距離に設定しておく
-        
+        rospy.wait_for_service("/speechToText")
+        text = self.speechToText(True, 4, False, True, -1, "")
         
 # OPが指差したカバンを探す
         rospy.wait_for_service("/camera")
         fingerDirection = self.camera_ser("finger", 5)
-        print(fingerDirection.res)
+        print("FINGER DIRECTION : " + fingerDirection.res)
 
-        fingerDirection =  get_direction(5)
-        print(fingerDirection)
+        # fingerDirection =  get_direction(5)
+        # print(fingerDirection)
         
         #@(制御)カメラを紙袋を検出する方に切り替える(紙袋を検出して、それに向かって動くpythonファイルを実行する)
-        #@(画像)YoLoで紙袋を認識するpythonファイルを作って、仮に紙袋が認識できるとき"ある",できないとき"ない"とする
+        #@(画像)YoLoで紙袋を認識するpythonファイルを作って、仮に紙袋が認識できるとき"ある",できないとき"ない"とするd
+
+        #thorough@(制御)(画像)#test
+        yolo_send_message = "ある"#test
+        self.audio_pub.publish("かみぶくろみつけた")#test
+
         while yolo_send_message != "ある":
             m = MoveAction()
             m.time = 0.1
@@ -210,6 +219,8 @@ class CarryMyLuggage():
         #カバンとの距離を決めておいた距離にする(approach_distance) 
         self.go_near(move_mode="back", approach_distance=1.0)
         
+        self.audio_pub.publish("かばんへうごいた")#test
+
         #@(制御)lidarの認識点として、Turtlebotの後側の認識点をやめる（カバンを壁として認識することの無いようにするため）
         
         
@@ -260,12 +271,12 @@ class CarryMyLuggage():
         res = ser(0, 0, 0, 0)
         print(res.res)
         
-        self.audio_pub.publish("かばんをわたした")
+        self.audio_pub.publish("かばんをわたした")#test
 
 # スタート位置に戻る
         reach_near_car = False #Falseに戻さないとgo_near関数はすぐに実行終了する
         #@(画像)(制御)スタート位置までの目印等
-        
+        self.audio_pub.publish("すたーとちにもどる")#test
         
 # プログラムを終了する
         m = MoveAction()
