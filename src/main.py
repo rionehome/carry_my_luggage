@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from ast import Str
 import rospy
 from std_msgs.msg import String, Float32
 from carry_my_luggage.msg import MoveAction, LidarData, PersonDetect
@@ -16,6 +17,7 @@ LINEAR_SPEED = 0.15 # m/s
 ANGULAR_SPEED = 0.75  # m/s
 
 reach_near_car = False
+
 class CarryMyLuggage():
     def __init__(self):
         rospy.init_node("main")
@@ -28,7 +30,9 @@ class CarryMyLuggage():
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
 
         # for camera
-        self.camera_ser = rospy.ServiceProxy("/camera", Camera_msg)
+        self.switch_pub = rospy.Publisher("/switch_camera", String, queue_size=1)
+        self.finger_sub = rospy.Subscriber("/finger_res", String, self.finger_cb)
+        self.finger_res = ""
         # for speechToText
 
         self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
@@ -38,8 +42,11 @@ class CarryMyLuggage():
         self.isMeaning = rospy.ServiceProxy("/isMeaning", isMeaning )
         
         #self.sub = rospy.Subscriber("/person", PersonDetect, self.callback)
-        
-    def go_near(self, move_mode, approach_distance):
+    
+    def finger_cb(self, message):
+        self.finger_res = message.data
+
+    def go_near(self, move_mode="front", approach_distance=0.8):
         global_direction = "forward"
         global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
         global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
@@ -49,6 +56,10 @@ class CarryMyLuggage():
         #Yolo information
         while True:
             print("go_near Function is runnning")
+            
+            if reach_near_car == True: #Trueのとき、この関数を終了する
+                return
+            
             #lidar information
             lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
             distance = lidarData.distance
@@ -56,15 +67,17 @@ class CarryMyLuggage():
             mn = min(distance)
             mn_index = distance.index(mn)
             mx = max(distance)
-
             mx_index = distance.index(mx)
             print("min:", mn, mn_index)
             print("max", mx, mx_index)
+            switch = String()
+            switch.data = "person"
+            self.switch_pub.publish(switch)
             detectData = rospy.wait_for_message('/person', PersonDetect)
             p_direction = detectData.robo_p_drct
             p_distance = detectData.robo_p_dis
             
-            #command select^
+            #command select
             c = MoveAction()
             c.distance = "forward"
             c.direction = "stop"
@@ -73,18 +86,18 @@ class CarryMyLuggage():
             c.linear_speed = 0.0
             c.angle_speed = 0.0
             c.direction = "normal"
-            if mn < 1.0:#止まる（Turtlebotからの距離が近い）
+            if mn < approach_distance: #止まる（Turtlebotからの距離が近い）
                 if global_direction != "stop":
                     print("I can get close here")
                     self.audio_pub.publish("これ以上近づけません")
                     time.sleep(2)
                     global_direction = "stop" 
+                    c.direction = "stop"
+                    c.angle_speed = 0.0
+                    c.linear_speed = 0.0
+                    c.distance = "long"
+                    self.move_pub.publish(c)
                     break
-                c.direction = "stop"
-                c.angle_speed = 0.0
-                c.linear_speed = 0.0
-                c.distance = "long"
-                
                 
                 #止まることを最優先するため、初期値で設定している
             elif p_direction == 0:
@@ -93,14 +106,16 @@ class CarryMyLuggage():
                     self.audio_pub.publish("たーんれふと")
                     global_direction = "left"
                 c.direction = "left"
-                c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+                # c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+                c.angle_speed = ANGULAR_SPEED
             elif p_direction == 2:
                 if global_direction != "right":
                     print("you are right side so I turn right")
                     self.audio_pub.publish("たーんらいと")
                     global_direction = "right"
                 c.direction = "right"
-                c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+                # c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
+                c.angle_speed = ANGULAR_SPEED
             elif p_direction== 1:
                 if global_direction != "forward":
                     print("you are good")
@@ -108,7 +123,7 @@ class CarryMyLuggage():
                     global_direction = "forward"
                 c.direction = "forward"
 
-            if mn < 1.0:
+            if mn < approach_distance:
                 c.linear_speed = 0.0
 
             elif p_distance == 0:
@@ -119,8 +134,8 @@ class CarryMyLuggage():
                 c.distance = "long"
                 if global_linear_speed < 0.5:
                     global_linear_speed += 0.07
-                if global_linear_speed < 1:
-                    global_linear_speed += 0.02
+                # if global_linear_speed < 1:
+                #     global_linear_speed += 0.02
                 c.linear_speed = global_linear_speed
                 print(c.linear_speed)
 
@@ -135,7 +150,6 @@ class CarryMyLuggage():
                     # global_linear_speed -= 0.7
                 c.linear_speed = 0.05
                 print(c.linear_speed)
-                self.audio_pub.publish("あああああああ")
 
             elif p_distance == 1:
                 if global_distance != "normal":
@@ -149,8 +163,11 @@ class CarryMyLuggage():
                 print(c.linear_speed)
 
             print("GLOBAL LINEAR : " + str(global_linear_speed))
+            
+            if move_mode == "back":
+                c.linear_speed *= -1
+                c.angle_speed *= -1
             self.move_pub.publish(c)
-
     
     def main(self): #@←これをまだできていないコードの部分のチェックマークとする
         # wait for nodes
@@ -165,15 +182,23 @@ class CarryMyLuggage():
 
 # OPに近づく（fingerで角度を識別でできる距離まで）
         #人間との距離が近づいた時点で止まる（引数から設定できるようにする
-        self.go_near(move_mode="front", approach_distance=1.0) #move_modeは正面をTurtlebotのどちらにするか, approach_distanceは最終的に止まる距離を示す
+        self.go_near(move_mode="front", approach_distance=0.3) #move_modeは正面をTurtlebotのどちらにするか, approach_distanceは最終的に止まる距離を示す
+        switch = String()
+        switch.data = "finger"
+        self.switch_pub.publish(switch)
+        detectData = rospy.wait_for_message('/finger_res', String)
+        self.audio_pub.publish("おわった")
 
         #approach_distanceを指を認識できる距離に設定しておく
         rospy.wait_for_service("/speechToText")
         text = self.speechToText(True, 4, False, True, -1, "")
         
 # OPが指差したカバンを探す
-        rospy.wait_for_service("/camera")
-        fingerDirection = self.camera_ser("finger", 5)
+        switch = String()
+        switch.data = "finger"
+        self.switch_pub.publish(switch)
+        rospy.wait_for_message("finger_res")
+        fingerDirection = self.finger_res
         print("FINGER DIRECTION : " + fingerDirection.res)
 
         # fingerDirection =  get_direction(5)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.10
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import sys
@@ -6,109 +6,102 @@ print(sys.version.split()[0])
 import cv2
 import mediapipe as mp
 
-mp_drawing = mp.solutions.drawing_utils
-mp_hands = mp.solutions.hands
-
 # For webcam input:
-cap = cv2.VideoCapture(0)
-
+# cap = cv2.VideoCapture(0)
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
-
 
 def get_direction(n):
+    cap = cv2.VideoCapture(0)
     right_count = 0
     left_count = 0
     direction = None
-    with mp_hands.Hands(
-            max_num_hands=2,
+    while True:
+        success, image = cap.read()
+        if not success:
+            print("Ignoring empty camera frame.")
+            continue
+
+        image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
+        image.flags.writeable = False
+        results = mp_hands.Hands(
             min_detection_confidence=0.5,
-            min_tracking_confidence=0.5) as hands:
-        while True:
-            success, image = cap.read()
-            if not success:
-                print("Ignoring empty camera frame.")
-                continue
+            min_tracking_confidence=0.5).process(image)
+        image.flags.writeable = True
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-            image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-            image.flags.writeable = False
-            results = hands.process(image)
-            image.flags.writeable = True
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-            if results.multi_hand_landmarks:
-                if len(results.multi_hand_landmarks) == 2:
-                    left_hand = results.multi_hand_landmarks[0]
-                    right_hand = results.multi_hand_landmarks[1]
-                    left_wrist = left_hand.landmark[0]
-                    right_wrist = right_hand.landmark[0]
-                    if abs(left_wrist.y - right_wrist.y) < 0.1:
-                        if left_wrist.x < right_wrist.x:
-                            if direction != "Right":
-                                right_count = 1
-                                left_count = 0
-                                direction = "Right"
-                            else:
-                                right_count += 1
-                                if right_count >= n:
-                                    return "Right"
+        if results.multi_hand_landmarks:
+            if len(results.multi_hand_landmarks) == 2:
+                left_hand = results.multi_hand_landmarks[0]
+                right_hand = results.multi_hand_landmarks[1]
+                left_wrist = left_hand.landmark[0]
+                right_wrist = right_hand.landmark[0]
+                if abs(left_wrist.y - right_wrist.y) < 0.1:
+                    if left_wrist.x < right_wrist.x:
+                        if direction != "Right":
+                            right_count = 1
+                            left_count = 0
+                            direction = "Right"
                         else:
-                            if direction != "Left":
-                                left_count = 1
-                                right_count = 0
-                                direction = "Left"
-                            else:
-                                left_count += 1
-                                if left_count >= n:
-                                    return "Left"
+                            right_count += 1
+                            if right_count >= n:
+                                return "Right"
                     else:
-                        if left_wrist.y < right_wrist.y:
-                            if direction != "Right":
-                                right_count = 1
-                                left_count = 0
-                                direction = "Right"
-                            else:
-                                right_count += 1
-                                if right_count >= n:
-                                    return "Right"
+                        if direction != "Left":
+                            left_count = 1
+                            right_count = 0
+                            direction = "Left"
                         else:
-                            if direction != "Left":
-                                left_count = 1
-                                right_count = 0
-                                direction = "Left"
-                            else:
-                                left_count += 1
-                                if left_count >= n:
-                                    return "Left"
+                            left_count += 1
+                            if left_count >= n:
+                                return "Left"
                 else:
-                    for hand_landmarks in results.multi_hand_landmarks:
-                        wrist = hand_landmarks.landmark[0]
-                        thumb_tip = hand_landmarks.landmark[4]
-                        index_tip = hand_landmarks.landmark[8]
-                        if index_tip.x < wrist.x:
-                            if direction != "Left":
-                                left_count = 1
-                                right_count = 0
-                                direction = "Left"
-                            else:
-                                left_count += 1
-                                if left_count >= n:
-                                    return "Left"
+                    if left_wrist.y < right_wrist.y:
+                        if direction != "Right":
+                            right_count = 1
+                            left_count = 0
+                            direction = "Right"
                         else:
-                            if direction != "Right":
-                                right_count = 1
-                                left_count = 0
-                                direction = "Right"
-                            else:
-                                right_count += 1
-                                if right_count >= n:
-                                    return "Right"
+                            right_count += 1
+                            if right_count >= n:
+                                return "Right"
+                    else:
+                        if direction != "Left":
+                            left_count = 1
+                            right_count = 0
+                            direction = "Left"
+                        else:
+                            left_count += 1
+                            if left_count >= n:
+                                return "Left"
+            else:
+                for hand_landmarks in results.multi_hand_landmarks:
+                    wrist = hand_landmarks.landmark[0]
+                    thumb_tip = hand_landmarks.landmark[4]
+                    index_tip = hand_landmarks.landmark[8]
+                    if index_tip.x < wrist.x:
+                        if direction != "Left":
+                            left_count = 1
+                            right_count = 0
+                            direction = "Left"
+                        else:
+                            left_count += 1
+                            if left_count >= n:
+                                return "Left"
+                    else:
+                        if direction != "Right":
+                            right_count = 1
+                            left_count = 0
+                            direction = "Right"
+                        else:
+                            right_count += 1
+                            if right_count >= n:
+                                return "Right"
 
-            cv2.imshow('MediaPipe Hands', image)
-            if cv2.waitKey(5) & 0xFF == 27:
-                break
+        cv2.imshow('MediaPipe Hands', image)
+        if cv2.waitKey(5) & 0xFF == 27:
+            break
     cap.release()
 
-
-print(get_direction(10))
+# print(get_direction(10))

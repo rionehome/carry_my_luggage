@@ -1,56 +1,48 @@
-#!/usr/bin/env python3.10
+#!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 
 import rospy
 import cv2
 import torch
 from carry_my_luggage.msg import PersonDetect
-from carry_my_luggage.srv import Camera_msg
+from std_msgs.msg import String
 from finger_direction import get_direction
 
 class Camera():
     def __init__(self):
-        self.sub = rospy.Service("/camera", Camera_msg, self.cb)
-        rospy.spin()
+        self.person_pub = rospy.Publisher("/person", PersonDetect, queue_size=1)
+        self.finger_pub = rospy.Publisher("/finger_res", String, queue_size=1)
+        self.sub = rospy.Subscriber("/switch_camera", String, self.cb)
+        self.switch = "person"
 
     def cb(self, message):
-        print(message.w)
-        print(message.n)
+        self.switch = message.data
 
-        if (message.data == "person"):
-            self.get_dis_drct()
-        elif (message.data == "finger"):
-            return self.get_direction(message.n)
-
-
-    def get_dis_drct():
-
-    
-        #publisher作る。
-        persondetect_pub = rospy.Publisher("/person", PersonDetect, queue_size=1)
-        #publisherを作った
-        
-        
-
+    def person_detect(self):
         model = torch.hub.load('ultralytics/yolov5', 'yolov5s') 
-        #img = cv2.imread('hiroyuki.jpg')
-
-        #print(model.names)
 
         cap = cv2.VideoCapture(0)
 
-
-        ret, img= cap.read() #画像の大きさを取得するために1度だけ最初によびだす。
-
-
-        robo_p_dis = 0 #ロボットと人との距離感覚
+        robo_p_dis = 0 #ロボットと人と の距離感覚
         robo_p_drct = 0 #ロボットと人との方向感覚
-        c = 0
+        c = 0  
         heigh = 0 #カメラから取得した画像の高さを保持
         width = 0 #カメラから取得した画像の幅を保持
 
         while True:
-            ret, img= cap.read()
+            # cap = cv2.VideoCapture(0)
+            if self.switch == "finger":
+                cap.release()  
+                # cv2.destroyAllWindows()
+                res = String()
+                res.data = get_direction(10)
+                self.finger_pub.publish(res)
+                return
+            
+            elif cap == None:
+                cap = cv2.VideoCapture(0)
+
+            ret, img= cap.read()   
             result = model(img)
 
             if c == 0:
@@ -84,7 +76,7 @@ class Camera():
                 #0番目の人(オペレータを想定している)について 
                 #ロボットから見たときの距離と方向について
 
-                print("w=" +str(w))
+                #print("w=" +str(w))
                 if name == "person" and i == 0:
                     if w < 350:
                         #print(str(i) + "番目の人が遠い")
@@ -111,16 +103,16 @@ class Camera():
                         #print(str(i) + "番目の人が右にいる")
                         robo_p_drct = 2 #ロボットは人が中央に来るまで右回りする
                         
-                print("距離:" + str(robo_p_dis) + "、方向:" + str(robo_p_drct))
+                # print("距離:" + str(robo_p_dis) + "、方向:" + str(robo_p_drct))
                     
-                print("名前" + str(name) + "幅:" + str(w) + ", 高さ:" + str(h))
+                # print("名前" + str(name) + "幅:" + str(w) + ", 高さ:" + str(h))
 
 
             #距離と方向をPublishしてほしい。
             p = PersonDetect()
             p.robo_p_dis = robo_p_dis
             p.robo_p_drct = robo_p_drct #改良してから変更する
-            persondetect_pub.publish(p)
+            self.person_pub.publish(p)
             #距離と方向をPublishした
 
             #バウンディングボックスを描画
@@ -130,14 +122,12 @@ class Camera():
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-
-        cap.release()
-        cv2.destroyAllWindows()
+    
 
 if __name__ == '__main__':
     rospy.init_node("person")
     camera = Camera()
     while not rospy.is_shutdown():
-        #camera.get_dis_drct()
+        camera.person_detect()
         rospy.Rate(10).sleep()
 
