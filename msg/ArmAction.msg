@@ -1,3 +1,3 @@
 float32[4] joint
-string gripper
+int16 gripper
 float32 time
