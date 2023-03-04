@@ -28,24 +28,17 @@ class Take_a_Bag():
         
         pi = math.pi
         # 付け根の角度
-        th0 = pi - 0.01
+        th0 = 0
         
         # init
         if message.x == 0 and message.y == 0:
-            th1 = -pi/3
+            th1 = -pi/4
             th2 = pi/4
-            th3 = pi/2 - 0.01
+            th3 = pi/4
             grip = 4
         
             # 以下の設定でアームを動かす
             armAction = ArmAction()
-            armAction.joint = [th0, -pi/3, th2, th3]
-            armAction.gripper = grip
-            self.arm_pub.publish(armAction)
-            time.sleep(3)   # アームのデフォルト動作時間が3秒
-            
-            th2 = pi/6
-            th3 = pi/4
             armAction.joint = [th0, th1, th2, th3]
             armAction.gripper = grip
             self.arm_pub.publish(armAction)
