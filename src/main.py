@@ -4,7 +4,8 @@
 import rospy
 from std_msgs.msg import String, Float32
 from carry_my_luggage.msg import MoveAction, LidarData, PersonDetect
-from carry_my_luggage.srv import Camera_msg, MoveArm
+from carry_my_luggage.srv import Camera_msg, MoveArm,SpeechToText, isMeaning
+
 import time
 import sys
 import os
@@ -28,13 +29,20 @@ class CarryMyLuggage():
 
         # for camera
         self.camera_ser = rospy.ServiceProxy("/camera", Camera_msg)
+        # for speechToText
+
+        self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
+
+        # for isMeaning
+
+        self.isMeaning = rospy.ServiceProxy("/isMeaning", isMeaning )
         
         #self.sub = rospy.Subscriber("/person", PersonDetect, self.callback)
         
     def go_near(self, move_mode="front", approach_distance=1.0):
         global_direction = "forward"
         global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
-        global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
+        # global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
         global_distance = "normal"
         #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
         
@@ -150,8 +158,10 @@ class CarryMyLuggage():
                 c.linear_speed *= -1
                 c.angle_speed *= -1
             self.move_pub.publish(c)
+
+
     
-    def main(self):
+    def main(self): #@←これをまだできていないコードの部分のチェックマークとする
         # wait for nodes
         time.sleep(3)
 
@@ -160,20 +170,51 @@ class CarryMyLuggage():
         res = ser(0, 0, 0, 0)
         print(res.res)
 
-        # OPに近づく（fingerで角度を識別でできる距離まで）
-        # self.go_near()
-        # print("終了しました")
+# OPに近づく（fingerで角度を識別でできる距離まで）
+        #人間との距離が近づいた時点で止まる（引数から設定できるようにする
+        self.go_near(move_mode="front", approach_distance=1.0) #move_modeは正面をTurtlebotのどちらにするか, approach_distanceは最終的に止まる距離を示す
+
+        #approach_distanceを指を認識できる距離に設定しておく
+        
+        
+# OPが指差したカバンを探す
         rospy.wait_for_service("/camera")
         fingerDirection = self.camera_ser("finger", 5)
         print(fingerDirection.res)
+
+        fingerDirection =  get_direction(5)
+        print(fingerDirection)
         
-        # OPが指差したカバンを探す
+        #@(制御)カメラを紙袋を検出する方に切り替える(紙袋を検出して、それに向かって動くpythonファイルを実行する)
+        #@(画像)YoLoで紙袋を認識するpythonファイルを作って、仮に紙袋が認識できるとき"ある",できないとき"ない"とする
+        while yolo_send_message != "ある":
+            m = MoveAction()
+            m.time = 0.1
+            m.angle_speed = 0.0
+            m.linear_speed = 0.0
+            m.distance = "normal"
+            
+            if fingerDirection == "right":
+                m.direction = "right"
+                m.angle_speed = ANGULAR_SPEED
+            elif fingerDirection == "left":
+                m.direction = "left"
+                m.angle_speed = ANGULAR_SPEED
+                
+            self.move_pub.publish(m)
         
         
-        # カバンの前まで移動
+#カバンの持ち手が持てるように移動する
+        #publishする前後と回転の方向を逆にする（カメラの向きに移動するため）(move_mode)
+        #@(画像)YoLoでカバンの輪っかに対面する場所に認識させる
+        #カバンとの距離を決めておいた距離にする(approach_distance) 
+        self.go_near(move_mode="back", approach_distance=1.0)
+        
+        #@(制御)lidarの認識点として、Turtlebotの後側の認識点をやめる（カバンを壁として認識することの無いようにするため）
         
         
-        # カバンをつかむ
+# カバンをつかむ
+        #原先輩のプログラムを参考に、armを動かすプログラムを適応させる
         #/ じゅんびして〜
         res = ser(23, 5, 10, 4)
         print(res.res)
@@ -193,14 +234,20 @@ class CarryMyLuggage():
         #/ もちあげてからの〜
         res = ser(30, 20, 30, 2)
         print(res.res)
-        
-        # OPに向かって進む（アリーナの外に出るため壁が近くてもぶつから内容に移動できなければならない）
-        
-        
-        # OPが車に向かって移動するので、ついていく
-        
 
-        # カバンを渡す
+        self.audio_pub.publish("きゃっちばっぐ")
+        
+# OPに向かって進む（アリーナの外に出るため壁が近くてもぶつから内容に移動できなければならない）
+        self.go_near()#この時点では人間を追いかけ続ける必要がある
+        
+        
+# OPが車に向かって移動するので、ついていく
+        self.audio_pub.publish("くるまのまえについたらおしえてください")
+        #車の前についたらgo_near()を終了させる
+        reach_near_car = True
+
+# カバンを渡す
+        #原先輩のプログラムを参考に、armを動かすプログラムを適応させる
         # おろす
         res = ser(35, 7, 10, 2)
         print(res.res)
@@ -213,10 +260,22 @@ class CarryMyLuggage():
         res = ser(0, 0, 0, 0)
         print(res.res)
         
-        # スタート位置に戻る
+        self.audio_pub.publish("かばんをわたした")
+
+# スタート位置に戻る
+        reach_near_car = False #Falseに戻さないとgo_near関数はすぐに実行終了する
+        #@(画像)(制御)スタート位置までの目印等
         
         
-        # プログラムを終了する
+# プログラムを終了する
+        m = MoveAction()
+        m.time = 0.1
+        m.angle_speed = 0.0
+        m.linear_speed = 0.0
+        m.direction = "forward"
+        m.distance = "normal"
+        self.move_pub.publish(m)
+        self.audio_pub.publish("実行終了しました。")
         
             
             

@@ -14,5 +14,5 @@
   <node pkg="carry_my_luggage" name="audio" type="audio.py" output="screen" />
   <node pkg="carry_my_luggage" name="lidar" type="lidar.py" output="screen" />
   <node pkg="carry_my_luggage" name="person" type="person_detect.py" output="screen" />
-  <node pkg="carry_my_luggage" name="shigoto_shimasu" type"move_arm.py" output="screen" />
+  <node pkg="carry_my_luggage" name="shigoto_shimasu" type="move_arm.py" output="screen" />
 </launch>
