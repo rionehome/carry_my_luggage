@@ -18,7 +18,7 @@ ANGULAR_SPEED = 0.75  # m/s
 reach_near_car = False
 class CarryMyLuggage():
     def __init__(self):
-        rospy.init_node("main")
+        rospy.init_node("main")426f8c5b8a23b9392a1040456f0db5f194816966 
         # for robot movement
         self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
@@ -159,7 +159,7 @@ class CarryMyLuggage():
         print("音声を実行しました。")
 
         ser = rospy.ServiceProxy("move_arm", MoveArm)
-        #/ 初期位置 #/←このマークをarmの行動とする
+        #/ 初期位置 #/←このマークをarmの行動と426f8c5b8a23b9392a1040456f0db5f194816966 する
         res = ser(0, 0, 0, 0)
         print(res.res)
 
