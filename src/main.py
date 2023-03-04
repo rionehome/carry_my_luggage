@@ -14,6 +14,7 @@ STOP_DISTANCE = 1.0 + 0.15 # m
 LINEAR_SPEED = 0.15 # m/s
 ANGULAR_SPEED = 0.75  # m/s
 
+reach_near_car = False
 class CarryMyLuggage():
     def __init__(self):
         rospy.init_node("main")
@@ -21,8 +22,7 @@ class CarryMyLuggage():
         self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
         # for robot arm manipulation
-        rospy.wait_for_service("/move_arm")
-        
+        rospy.wait_for_message("/move_arm")
         # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
 
@@ -31,7 +31,7 @@ class CarryMyLuggage():
         
         #self.sub = rospy.Subscriber("/person", PersonDetect, self.callback)
         
-    def go_near(self):
+    def go_near(self, move_mode="front", approach_distance=1.0):
         global_direction = "forward"
         global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
         global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
@@ -41,6 +41,10 @@ class CarryMyLuggage():
         #Yolo information
         while True:
             print("go_near Function is runnning")
+            
+            if reach_near_car == True: #Trueのとき、この関数を終了する
+                return
+            
             #lidar information
             lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
             distance = lidarData.distance
@@ -65,7 +69,7 @@ class CarryMyLuggage():
             c.linear_speed = 0.0
             c.angle_speed = 0.0
             c.direction = "normal"
-            if mn < 1.0:#止まる（Turtlebotからの距離が近い）
+            if mn < approach_distance: #止まる（Turtlebotからの距離が近い）
                 if global_direction != "stop":
                     print("I can get close here")
                     self.audio_pub.publish("これ以上近づけません")
@@ -100,7 +104,7 @@ class CarryMyLuggage():
                     global_direction = "forward"
                 c.direction = "forward"
 
-            if mn < 1.0:
+            if mn < approach_distance:
                 c.linear_speed = 0.0
 
             elif p_distance == 0:
@@ -141,6 +145,10 @@ class CarryMyLuggage():
                 print(c.linear_speed)
 
             print("GLOBAL LINEAR : " + str(global_linear_speed))
+            
+            if move_mode == "back":
+                c.linear_speed *= -1
+                c.angle_speed *= -1
             self.move_pub.publish(c)
     
     def main(self):
