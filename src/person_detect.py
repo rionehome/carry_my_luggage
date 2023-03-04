@@ -23,11 +23,14 @@ class Camera():
 
         cap = cv2.VideoCapture(0)
 
-        robo_p_dis = 0 #ロボットと人と の距離感覚
-        robo_p_drct = 0 #ロボットと人との方向感覚
+        #人が写っていない前提で初期化する
+        robo_p_dis = 3 #ロボットと人と の距離感覚
+        robo_p_drct = 3 #ロボットと人との方向感覚
         c = 0  
         heigh = 0 #カメラから取得した画像の高さを保持
         width = 0 #カメラから取得した画像の幅を保持
+
+        person_count = 0 #人が写っているかどうかを判定するための変数
 
         while True:
             # cap = cv2.VideoCapture(0)
@@ -55,65 +58,80 @@ class Camera():
             #推論結果を取得
             obj = result.pandas().xyxy[0]
 
+            #人が写っているかを調べる
+            for i in range(len(obj)):
+                if obj.name[i] == "person":
+                    person_count += 1
+                    break
+                
+            #人が一人も写っていないとき
+            if person_count == 0:
 
-            #バウンディングボックスの情報を取得
-            for  i in range(len(obj)):
-                name = obj.name[i]
-                xmin = obj.xmin[i]
-                ymin = obj.ymin[i]
-                xmax = obj.xmax[i]
-                ymax = obj.ymax[i]
+                #探す指示を距離3方向3として与える
+                robo_p_dis = 3
+                robo_p_drct = 3
 
-                #print("name =", name, "xmin =", xmin, "ymin =", ymin, "xmax =", ymax, "ymin =", ymax)
+            #人が写っているとき
+            if person_count == 1:
 
-                w = xmax - xmin #矩形の幅
-                h = ymax - ymin #矩形の高さ
-                c_x = (xmax + xmin)/2 #矩形の中心のx座標
-                c_y = (ymax + ymin)/2 #矩形の中心のy座標
-
-
-
-                #0番目の人(オペレータを想定している)について 
-                #ロボットから見たときの距離と方向について
-
-                #print("w=" +str(w))
-                if name == "person" and i == 0:
-                    if w < 350:
-                        #print(str(i) + "番目の人が遠い")
-                        robo_p_dis = 0 #ロボットは人が中央に来るまで前に進む
-
-                    elif w >= 350 and w <= 380:
-                        #print(str(i) + "番目の人が中央の距離")
-                        robo_p_dis = 1 #ロボットはそのまま
-
-                    elif w > 380:
-                        #print(str(i) + "番目の人が近い")
-                        robo_p_dis = 2 #ロボットは人が中央に来るまで後ろに下がる
-                        print("ああああああああああああああああああ")
-
-                    if c_x < width/3:
-                        #print(str(i) + "番目の人が左にいる")
-                        robo_p_drct = 0 #ロボットは人が中央に来るまで左回りする
-
-                    elif c_x > width/3 and c_x < width * 2/3:
-                        #print(str(i) + "番目の人が中央の方向")
-                        robo_p_drct = 1 #ロボットはそのまま
-
-                    elif c_x > width * 2/3:
-                        #print(str(i) + "番目の人が右にいる")
-                        robo_p_drct = 2 #ロボットは人が中央に来るまで右回りする
-                        
-                # print("距離:" + str(robo_p_dis) + "、方向:" + str(robo_p_drct))
+                #バウンディングボックスの情報を取得
+                for  i in range(len(obj)):
                     
-                # print("名前" + str(name) + "幅:" + str(w) + ", 高さ:" + str(h))
+                    #0番目の人(オペレータを想定している)について 
+                    #ロボットから見たときの距離と方向について
+                    if obj.name[i] == "person" and i == 0:
+                    
+                        name = obj.name[i]
+                        xmin = obj.xmin[i]
+                        ymin = obj.ymin[i]
+                        xmax = obj.xmax[i]
+                        ymax = obj.ymax[i]
 
+                        #print("name =", name, "xmin =", xmin, "ymin =", ymin, "xmax =", ymax, "ymin =", ymax)
+
+                        w = xmax - xmin #矩形の幅
+                        h = ymax - ymin #矩形の高さ
+                        c_x = (xmax + xmin)/2 #矩形の中心のx座標
+                        c_y = (ymax + ymin)/2 #矩形の中心のy座標
+                        
+                        
+                        if w < 350:
+                            #print(str(i) + "番目の人が遠い")
+                            robo_p_dis = 0 #ロボットは人が中央に来るまで前に進む
+
+                        elif w >= 350 and w <= 380:
+                            #print(str(i) + "番目の人が中央の距離")
+                            robo_p_dis = 1 #ロボットはそのまま
+
+                        elif w > 380:
+                            #print(str(i) + "番目の人が近い")
+                            robo_p_dis = 2 #ロボットは人が中央に来るまで後ろに下がる
+
+                        if c_x < width/3:
+                            #print(str(i) + "番目の人が左にいる")
+                            robo_p_drct = 0 #ロボットは人が中央に来るまで左回りする
+
+                        elif c_x > width/3 and c_x < width * 2/3:
+                            #print(str(i) + "番目の人が中央の方向")
+                            robo_p_drct = 1 #ロボットはそのまま
+
+                        elif c_x > width * 2/3:
+                            #print(str(i) + "番目の人が右にいる")
+                            robo_p_drct = 2 #ロボットは人が中央に来るまで右回りする
+                            
+                    # print("距離:" + str(robo_p_dis) + "、方向:" + str(robo_p_drct))
+                        
+                    # print("名前" + str(name) + "幅:" + str(w) + ", 高さ:" + str(h))
 
             #距離と方向をPublishしてほしい。
             p = PersonDetect()
             p.robo_p_dis = robo_p_dis
             p.robo_p_drct = robo_p_drct #改良してから変更する
+            p.p_exist = person_count
             self.person_pub.publish(p)
             #距離と方向をPublishした
+            
+            person_count = 0 #判定するための変数を初期化する
 
             #バウンディングボックスを描画
             result.render()
