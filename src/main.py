@@ -105,7 +105,8 @@ class CarryMyLuggage():
                     c.linear_speed = 0.0
                     c.distance = p_distance
                     self.move_pub.publish(c)
-                    break
+                    #break
+                    return
                 elif left_right == "right":
                     c.direction = "left"
                 else:
