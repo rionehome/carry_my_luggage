@@ -49,7 +49,6 @@ class CarryMyLuggage():
     def go_near(self, move_mode="front", approach_distance=0.8, lidar_ignore="no"):
         global_direction = "forward"
         global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
-        global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
         global_distance = "normal"
         #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
         
@@ -85,7 +84,6 @@ class CarryMyLuggage():
             #command select
             c = MoveAction()
             c.distance = "forward"
-            c.direction = "stop"
             c.direction = "normal"
             c.time = 0.1
             c.linear_speed = 0.0
@@ -103,7 +101,7 @@ class CarryMyLuggage():
                     c.direction = "stop"
                     c.angle_speed = 0.0
                     c.linear_speed = 0.0
-                    c.distance = p_distance
+                    c.distance = "stop"
                     self.move_pub.publish(c)
                     #break
                     return
@@ -111,20 +109,36 @@ class CarryMyLuggage():
                     c.direction = "left"
                 else:
                     c.direction = "right"
-                c.angle_speed = ANGULAR_SPEED
+                c.angle_speed = ANGULAR_SPEED   #@@@@@@ここも変えて<-これを検索する
+                global_direction = left_right
                 
                 if move_mode == "front":
                     if front_back == "back":
-                        c.linear_speed = LINEAR_SPEED
+                        c.linear_speed = LINEAR_SPEED 
                     else:
                         c.linear_speed = 0.0
+                    c.distance = "stop"
+                    global_distance = "stop"
                     self.move_pub.publish(c)
                 else:
                     if front_back == "front":
                         c.linear_speed = -LINEAR_SPEED
                     else:
                         c.linear_speed = 0.0
+                    c.distance = "stop"
+                    global_distance = "stop"
                     self.move_pub.publish(c)
+                count_time += 1
+                
+            elif global_distance == "stop":
+                c.distance = "forward"
+                c.direction = global_direction
+                c.angle_speed = LINEAR_SPEED #@@@@@@ここも変えて
+                c.linear_speed = 0.0
+                self.move_pub.publish(c)
+                time.sleep(count_time)
+                global_direction = "forward"
+                global_distance = "normal"
                 
             elif p_direction == 0:
                 if global_direction != "left":
