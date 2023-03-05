@@ -2,18 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import sys
-print(sys.version.split()[0])
 import cv2
 import mediapipe as mp
 
-# For webcam input:
-# cap = cv2.VideoCapture(0)
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 
 def get_direction(n):
     cap = cv2.VideoCapture(0)
+    mp_drawing = mp.solutions.drawing_utils
+    mp_hands = mp.solutions.hands
     right_count = 0
     left_count = 0
     direction = None
