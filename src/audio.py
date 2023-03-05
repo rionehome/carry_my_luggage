@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 
 import rospy
@@ -27,7 +27,7 @@ class Audio():
         return recognize_speech(msg.print_partial, msg.use_break, msg.return_extract_person_name, msg.remove_space, msg.voskLogLevel, msg.path)
     
     def callback(self, msg):
-        textToSpeech(msg.data, verbose=True)
+        textToSpeech(msg.data)
 
 if __name__ == '__main__':
     rospy.init_node("audio")

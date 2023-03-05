@@ -7,6 +7,7 @@ import torch
 from carry_my_luggage.msg import PersonDetect
 from std_msgs.msg import String
 from finger_direction import get_direction
+import time
 
 class Camera():
     def __init__(self):
@@ -42,6 +43,8 @@ class Camera():
                 self.finger_pub.publish(res)
                 return
             
+            elif self.switch == "realsence":
+                return
             elif cap == None:
                 cap = cv2.VideoCapture(0)
 
