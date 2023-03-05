@@ -46,7 +46,7 @@ class CarryMyLuggage():
     def finger_cb(self, message):
         self.finger_res = message.data
 
-    def go_near(self, move_mode="front", approach_distance=0.8):
+    def go_near(self, move_mode="front", approach_distance=0.8, lidar_ignore="no"):
         global_direction = "forward"
         global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
         global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
@@ -63,6 +63,7 @@ class CarryMyLuggage():
             #lidar information
             lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
             distance = lidarData.distance
+            
             print(distance)
             mn = min(distance)
             mn_index = distance.index(mn)
@@ -70,6 +71,10 @@ class CarryMyLuggage():
             mx_index = distance.index(mx)
             print("min:", mn, mn_index)
             print("max", mx, mx_index)
+            front_back = lidarData.front_back
+            left_right = lidarData.left_right
+            
+            
             switch = String()
             switch.data = "person"
             self.switch_pub.publish(switch)
@@ -81,25 +86,45 @@ class CarryMyLuggage():
             c = MoveAction()
             c.distance = "forward"
             c.direction = "stop"
-            c.distance = "normal"
+            c.direction = "normal"
             c.time = 0.1
             c.linear_speed = 0.0
             c.angle_speed = 0.0
-            c.direction = "normal"
+            
+            if lidar_ignore == "ignore_back":
+                mn = min(distance[0:5], distance[18:len(distance)])
+            
             if mn < approach_distance: #止まる（Turtlebotからの距離が近い）
-                if global_direction != "stop":
-                    print("I can get close here")
+                if p_distance == "normal" or p_distance == "short":
+                    print("I can get close here.")
                     self.audio_pub.publish("これ以上近づけません")
                     time.sleep(2)
                     global_direction = "stop" 
                     c.direction = "stop"
                     c.angle_speed = 0.0
                     c.linear_speed = 0.0
-                    c.distance = "long"
+                    c.distance = p_distance
                     self.move_pub.publish(c)
                     break
+                elif left_right == "right":
+                    c.direction = "left"
+                else:
+                    c.direction = "right"
+                c.angle_speed = ANGULAR_SPEED
                 
-                #止まることを最優先するため、初期値で設定している
+                if move_mode == "front":
+                    if front_back == "back":
+                        c.linear_speed = LINEAR_SPEED
+                    else:
+                        c.linear_speed = 0.0
+                    self.move_pub.publish(c)
+                else:
+                    if front_back == "front":
+                        c.linear_speed = -LINEAR_SPEED
+                    else:
+                        c.linear_speed = 0.0
+                    self.move_pub.publish(c)
+                
             elif p_direction == 0:
                 if global_direction != "left":
                     print("you are left side so I turn left")
@@ -264,7 +289,7 @@ class CarryMyLuggage():
         self.audio_pub.publish("きゃっちばっぐ")
         
 # OPに向かって進む（アリーナの外に出るため壁が近くてもぶつから内容に移動できなければならない）
-        self.go_near()#この時点では人間を追いかけ続ける必要がある
+        self.go_near("front", 0.8, "ignore-back")#この時点では人間を追いかけ続ける必要がある
         
         
 # OPが車に向かって移動するので、ついていく
