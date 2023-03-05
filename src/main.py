@@ -11,6 +11,8 @@ import time
 import sys
 import os
 from math import pi
+print(sys.version.split()[0])
+
 
 STOP_DISTANCE = 1.0 + 0.15 # m
 LINEAR_SPEED = 0.05 # m/s
@@ -174,9 +176,10 @@ class CarryMyLuggage():
     def main(self): #@←これをまだできていないコードの部分のチェックマークとする
         # wait for nodes
         time.sleep(3)
-
-        # res = self.isMeaning("test",["test"],"-r /home/ri-one/.local/lib/python3.7/site-packages/unidic_lite/dicdir/mecabrc")
-        # print(res)
+        # rospy.wait_for_service("/isMeaning")
+        # # im = isMeaning()
+        # res = self.isMeaning("test",["test"])
+        # print("RES : " + str(res.res))
 
         ser = rospy.ServiceProxy("move_arm", MoveArm)
         #/ 初期位置 #/←このマークをarmの行動と426f8c5b8a23b9392a1040456f0db5f194816966 する
