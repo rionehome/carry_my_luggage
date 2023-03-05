@@ -1,5 +1,4 @@
 string text
 string[] word_list
-string path
 ---
 bool res
