@@ -132,7 +132,7 @@ class CarryMyLuggage():
                     c.distance = "stop"
                     global_distance = "stop"
                     self.move_pub.publish(c)
-                count_time += 1
+                # count_time += 1
                 
             # elif global_distance == "stop":
             #     c.distance = "forward"
@@ -216,6 +216,7 @@ class CarryMyLuggage():
     def main(self): #@←これをまだできていないコードの部分のチェックマークとする
         # wait for nodes
         time.sleep(3)
+        self.audio_pub.publish("テスト")
         # rospy.wait_for_service("/isMeaning")
         # # im = isMeaning()
         # res = self.isMeaning("test",["test"])
