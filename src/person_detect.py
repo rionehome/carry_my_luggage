@@ -82,7 +82,7 @@ class Camera():
                         #print(str(i) + "番目の人が遠い")
                         robo_p_dis = 0 #ロボットは人が中央に来るまで前に進む
 
-                    elif w >= 350 and w <= 380:
+                    elif w >= 500 and w <= 380:
                         #print(str(i) + "番目の人が中央の距離")
                         robo_p_dis = 1 #ロボットはそのまま
 
