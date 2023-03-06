@@ -300,7 +300,9 @@ class CarryMyLuggage():
 
         switch.data = "person"
         self.switch_pub.publish(switch)
-        rospy.wait_for_message('/person', PersonDetect)
+        # rest = rospy.wait_for_message('/person', PersonDetect)
+
+        # print(rest)
         time.sleep(1)
 
         
