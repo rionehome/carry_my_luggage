@@ -255,7 +255,7 @@ class CarryMyLuggage():
 
 # OPに近づく（fingerで角度を識別でできる距離まで）
         #人間との距離が近づいた時点で止まる（引数から設定できるようにする  　#approach_distanceを指を認識できる距離に設定しておく
-        self.go_near(move_mode="front", approach_distance=0.5) #move_modeは正面をTurtlebotのどちらにするか, approach_distanceは最終的に止まる距離を示す
+        self.go_near(move_mode="front", approach_distance=0.8) #move_modeは正面をTurtlebotのどちらにするか, approach_distanceは最終的に止まる距離を示す
 # OPが指差したカバンを探す
         switch = String()
         switch.data = "finger"
