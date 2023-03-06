@@ -101,17 +101,14 @@ class Camera():
                         if w < 500:
                             #print(str(i) + "番目の人が遠い")
                             robo_p_dis = 0 #ロボットは人が中央に来るまで前に進む
-                            print("ととととと")
 
                         elif w >= 500 and w <= 380:
                             #print(str(i) + "番目の人が中央の距離")
                             robo_p_dis = 1 #ロボットはそのまま
-                            print("ふふふふふ")
 
                         elif w > 380:
                             #print(str(i) + "番目の人が近い")
                             robo_p_dis = 2 #ロボットは人が中央に来るまで後ろに下がる
-                            print("ちちちちち")
 
                         if c_x < width/3:
                             #print(str(i) + "番目の人が左にいる")

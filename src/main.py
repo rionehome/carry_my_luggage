@@ -65,26 +65,11 @@ class CarryMyLuggage():
         self.move_pub.publish(c)
 
     def go_near(self, move_mode="front", approach_distance=0.8, lidar_ignore="no", is_paper=False):
-        #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
-        
-        #Yolo information
         while True:
-            print("go_near Function is runnning")
-        
-            #(制御)車の前についたタイミングの話
-            #車の前についたらgo_near()を終了させる
-            # rospy.wait_for_service("/speechToText")
-            # text = self.speechToText(True, 4, False, True, -1, "")
-            # if reach_near_car == True: #Trueのとき、この関数を終了する
-            #     return
-            
-            #lidar information
-            print("LIDER")
-            lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
-            print("LIDER2")
+            lidarData = rospy.wait_for_message('/lidar', LidarData)
+
             distance = lidarData.distance
             
-            print(distance)
             mn = min(distance)
             mn_index = distance.index(mn)
             mx = max(distance)
@@ -112,7 +97,7 @@ class CarryMyLuggage():
             c = MoveAction()
             c.distance = "forward"
             c.direction = "normal"
-            c.time = 0.1
+            c.time = 0.1 
             c.linear_speed = 0.0
             c.angle_speed = 0.0
             
@@ -120,7 +105,19 @@ class CarryMyLuggage():
                 mn = min(distance[0:5], distance[18:len(distance)])
             
             if mn < approach_distance: #止まる（Turtlebotからの距離が近い）
-                if p_distance == "normal" or p_distance == "short":
+                if 0 <= mn_index <= 4 or 19 <= mn_index <= 23:
+                    print("I can get close here.")
+                    self.audio_pub.publish("これ以上近づけません")
+                    time.sleep(2)
+                    global_direction = "stop" 
+                    c.direction = "stop"
+                    c.angle_speed = 0.0
+                    c.linear_speed = 0.0
+                    c.distance = "stop"
+                    self.move_pub.publish(c)
+                    #break
+                    return
+                elif p_distance == "normal" or p_distance == "short":
                     print("I can get close here.")
                     self.audio_pub.publish("これ以上近づけません")
                     time.sleep(2)
@@ -155,17 +152,6 @@ class CarryMyLuggage():
                     c.distance = "stop"
                     global_distance = "stop"
                     self.move_pub.publish(c)
-                # count_time += 1
-                
-            # elif global_distance == "stop":
-            #     c.distance = "forward"
-            #     c.direction = global_direction
-            #     c.angle_speed = LINEAR_SPEED #@@@@@@ここも変えて
-            #     c.linear_speed = 0.0
-            #     self.move_pub.publish(c)
-            #     time.sleep(count_time)
-            #     global_direction = "forward"
-            #     global_distance = "normal"
 
             elif p_direction == 3 or p_distance == 3:
                 self.serch_around()
@@ -173,23 +159,18 @@ class CarryMyLuggage():
             elif p_direction == 0:
                 if global_direction != "left":
                     print("you are left side so I turn left")
-                    # self.audio_pub.publish("たーんれふと")
                     global_direction = "left"
                 c.direction = "left"
-                # c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
                 c.angle_speed = ANGULAR_SPEED
             elif p_direction == 2:
                 if global_direction != "right":
                     print("you are right side so I turn right")
-                    # self.audio_pub.publish("たーんらいと")
                     global_direction = "right"
                 c.direction = "right"
-                # c.angle_speed = ANGULAR_SPEED + global_linear_speed * 2 
                 c.angle_speed = ANGULAR_SPEED
             elif p_direction== 1:
                 if global_direction != "forward":
                     print("you are good")
-                    # self.audio_pub.publish("かくどいいね")
                     global_direction = "forward"
                 c.direction = "forward"
 
@@ -204,8 +185,6 @@ class CarryMyLuggage():
                 c.distance = "long"
                 if global_linear_speed < 0.5:
                     global_linear_speed += 0.02
-                # if global_linear_speed < 1:
-                #     global_linear_speed += 0.02
                 c.linear_speed = global_linear_speed
                 print(c.linear_speed)
 
@@ -216,8 +195,6 @@ class CarryMyLuggage():
                     global_distance = "short"
                 c.distance = "short"
                 global_linear_speed = 0.1
-                # if global_linear_speed >= 0.1:
-                    # global_linear_speed -= 0.7
                 c.linear_speed = 0.05
                 print(c.linear_speed)
 
@@ -232,7 +209,6 @@ class CarryMyLuggage():
                 c.linear_speed = global_linear_speed
                 print(c.linear_speed)
 
-            print("GLOBAL LINEAR : " + str(global_linear_speed))
             
             if move_mode == "back":
                 c.linear_speed *= -1
@@ -240,15 +216,7 @@ class CarryMyLuggage():
             self.move_pub.publish(c)
     
     def main(self): #@←これをまだできていないコードの部分のチェックマークとする
-        # wait for nodes
         time.sleep(3)
-        print("main")
-        self.audio_pub.publish("テスト")
-        # rospy.wait_for_service("/isMeaning")
-        # # im = isMeaning()
-        # res = self.isMeaning("test",["test"])
-        # print("RES : " + str(res.res))
-
         ser = rospy.ServiceProxy("move_arm", MoveArm)
         #/ 初期位置 #/←このマークをarmの行動と426f8c5b8a23b9392a1040456f0db5f194816966 する
         res = ser(0, 0, 0, 0)
@@ -257,6 +225,7 @@ class CarryMyLuggage():
 
 # OPに近づく（fingerで角度を識別でできる距離まで）
         #人間との距離が近づいた時点で止まる（引数から設定できるようにする  　#approach_distanceを指を認識できる距離に設定しておく
+        self.audio_pub.publish("めいんかんすうをじっこうちゅう")
         self.go_near(move_mode="front", approach_distance=0.8) #move_modeは正面をTurtlebotのどちらにするか, approach_distanceは最終的に止まる距離を示す
 # OPが指差したカバンを探す
         switch = String()
@@ -298,7 +267,7 @@ class CarryMyLuggage():
             #@(制御)おそらく、ここでbag_existの状態を更新する
         self.audio_pub.publish("かみぶくろをはっけんしました。紙袋に向かって進みます")
 
-        self.go_near("back", 0.5, "no", True)
+        # self.go_near("back", 0.5, "no", True)
 
         switch.data = "person"
         self.switch_pub.publish(switch)
@@ -312,7 +281,7 @@ class CarryMyLuggage():
         #publishする前後と回転の方向を逆にする（カメラの向きに移動するため）(move_mode)
         #@(画像)YoLoでカバンの輪っかに対面するPaper場所に認識させる
         #カバンとの距離を決めておいた距離にする(approach_distance) 
-        self.go_near(move_mode="back", approach_distance=1.0)
+        # self.go_near(move_mode="back", approach_distance=1.0)
         self.audio_pub.publish("かばんの場所に到着しました。かばんを掴みます。")#test
         time.sleep(3)
 
