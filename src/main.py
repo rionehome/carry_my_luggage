@@ -18,6 +18,10 @@ STOP_DISTANCE = 1.0 + 0.15 # m
 LINEAR_SPEED = 0.05 # m/s
 ANGULAR_SPEED = 0.75  # m/s
 
+global_direction = "forward"
+global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
+global_distance = "normal"
+
 class CarryMyLuggage():
     def __init__(self):
         rospy.init_node("main")
@@ -45,11 +49,21 @@ class CarryMyLuggage():
     
     def finger_cb(self, message):
         self.finger_res = message.data
+        
+    def serch_around(self):
+        c = MoveAction()
+        c.time = 0.1
+        if global_distance != "lost":
+            global_distance =="lost"
+            global_direction == "right"
+            self.audio_pub.publish("さがす")
+        c.angle_speed = ANGULAR_SPEED #調整
+        c.linear_speed = 0.0
+        c.direction = global_direction
+        c.distance = global_distance
+        self.move_pub.publish(c)
 
     def go_near(self, move_mode="front", approach_distance=0.8, lidar_ignore="no"):
-        global_direction = "forward"
-        global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
-        global_distance = "normal"
         #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
         
         #Yolo information
@@ -143,7 +157,10 @@ class CarryMyLuggage():
             #     time.sleep(count_time)
             #     global_direction = "forward"
             #     global_distance = "normal"
-                
+
+            elif p_direction == 3 or p_distance == 3:
+                self.serch_around()
+
             elif p_direction == 0:
                 if global_direction != "left":
                     print("you are left side so I turn left")
