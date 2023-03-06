@@ -65,24 +65,16 @@ class CarryMyLuggage():
         c.distance = global_distance
         self.move_pub.publish(c)
 
-    def go_near(self, move_mode="front", approach_distance=0.8, lidar_ignore="no", is_paper=False):
-        #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
-        
-        #Yolo information
+    def go_near(self, move_mode="front", approach_distance=0.8):
+        global_direction = "forward"
+        global_linear_speed = LINEAR_SPEED #対象に合わせて、速度を変える
+        global_angle_speed = ANGULAR_SPEED #これは使いみち無いかも
+        global_distance = "normal"
         while True:
             print("go_near Function is runnning")
         
-            #(制御)車の前についたタイミングの話
-            #車の前についたらgo_near()を終了させる
-            # rospy.wait_for_service("/speechToText")
-            # text = self.speechToText(True, 4, False, True, -1, "")
-            # if reach_near_car == True: #Trueのとき、この関数を終了する
-            #     return
-            
-            #lidar information
-            lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
+            lidarData = rospy.wait_for_message('/lidar', LidarData)
             distance = lidarData.distance
-            
             print(distance)
             mn = min(distance)
             mn_index = distance.index(mn)
@@ -90,85 +82,35 @@ class CarryMyLuggage():
             mx_index = distance.index(mx)
             print("min:", mn, mn_index)
             print("max", mx, mx_index)
-            front_back = lidarData.front_back
-            left_right = lidarData.left_right
-            
-            
             switch = String()
             switch.data = "person"
             self.switch_pub.publish(switch)
-
-            if (is_paper):
-                detectData = rospy.wait_for_message('/paper', PaperDetect)
-                
-            else:
-                detectData = rospy.wait_for_message('/person', PersonDetect)
-
+            detectData = rospy.wait_for_message('/person', PersonDetect)
             p_direction = detectData.robo_p_drct
             p_distance = detectData.robo_p_dis
             
-            #command select
             c = MoveAction()
             c.distance = "forward"
-            c.direction = "normal"
+            c.direction = "stop"
+            c.distance = "normal"
             c.time = 0.1
             c.linear_speed = 0.0
             c.angle_speed = 0.0
-            
-            if lidar_ignore == "ignore_back":
-                mn = min(distance[0:5], distance[18:len(distance)])
-            
+            c.direction = "normal"
             if mn < approach_distance: #止まる（Turtlebotからの距離が近い）
-                if p_distance == "normal" or p_distance == "short":
-                    print("I can get close here.")
+                if global_direction != "stop":
+                    print("I can get close here")
                     self.audio_pub.publish("これ以上近づけません")
                     time.sleep(2)
                     global_direction = "stop" 
                     c.direction = "stop"
                     c.angle_speed = 0.0
                     c.linear_speed = 0.0
-                    c.distance = "stop"
+                    c.distance = "long"
                     self.move_pub.publish(c)
-                    #break
-                    return
-                elif left_right == "right":
-                    c.direction = "left"
-                else:
-                    c.direction = "right"
-                c.angle_speed = ANGULAR_SPEED   #@@@@@@ここも変えて<-これを検索する
-                global_direction = left_right
+                    break
                 
-                if move_mode == "front":
-                    if front_back == "back":
-                        c.linear_speed = LINEAR_SPEED 
-                    else:
-                        c.linear_speed = 0.0
-                    c.distance = "stop"
-                    global_distance = "stop"
-                    self.move_pub.publish(c)
-                else:
-                    if front_back == "front":
-                        c.linear_speed = -LINEAR_SPEED
-                    else:
-                        c.linear_speed = 0.0
-                    c.distance = "stop"
-                    global_distance = "stop"
-                    self.move_pub.publish(c)
-                # count_time += 1
-                
-            # elif global_distance == "stop":
-            #     c.distance = "forward"
-            #     c.direction = global_direction
-            #     c.angle_speed = LINEAR_SPEED #@@@@@@ここも変えて
-            #     c.linear_speed = 0.0
-            #     self.move_pub.publish(c)
-            #     time.sleep(count_time)
-            #     global_direction = "forward"
-            #     global_distance = "normal"
-
-            elif p_direction == 3 or p_distance == 3:
-                self.serch_around()
-
+                #止まることを最優先するため、初期値で設定している
             elif p_direction == 0:
                 if global_direction != "left":
                     print("you are left side so I turn left")
@@ -230,8 +172,6 @@ class CarryMyLuggage():
                     global_linear_speed -= 0.05
                 c.linear_speed = global_linear_speed
                 print(c.linear_speed)
-
-            print("GLOBAL LINEAR : " + str(global_linear_speed))
             
             if move_mode == "back":
                 c.linear_speed *= -1
@@ -254,7 +194,7 @@ class CarryMyLuggage():
 
 
 # OPに近づく（fingerで角度を識別でできる距離まで）
-        #人間との距離が近づいた時点で止まる（引数から設定できるようにする  　#approach_distanceを指を認識できる距離に設定しておく
+        #人間との距離が近づいた時点で止まる（引数から設定できるようにする  #approach_distanceを指を認識できる距離に設定しておく
         self.go_near(move_mode="front", approach_distance=0.5) #move_modeは正面をTurtlebotのどちらにするか, approach_distanceは最終的に止まる距離を示す
 # OPが指差したカバンを探す
         switch = String()
@@ -296,7 +236,7 @@ class CarryMyLuggage():
             #@(制御)おそらく、ここでbag_existの状態を更新する
         self.audio_pub.publish("かみぶくろをはっけんしました。紙袋に向かって進みます")
 
-        self.go_near("back", 0.5, "no", True)
+        self.go_near("back", 0.5, "no")
 
         switch.data = "person"
         self.switch_pub.publish(switch)
