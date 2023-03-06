@@ -28,8 +28,7 @@ class CarryMyLuggage():
         self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
         # for robot arm manipulation
-
-        
+        rospy.wait_for_service("/move_arm")
         # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
 
@@ -80,7 +79,9 @@ class CarryMyLuggage():
             #     return
             
             #lidar information
+            print("LIDER")
             lidarData = rospy.wait_for_message('/lidar', LidarData) #lidar.pyから一つのデータが送られてくるまで待つ
+            print("LIDER2")
             distance = lidarData.distance
             
             print(distance)
