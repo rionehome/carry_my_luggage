@@ -335,7 +335,7 @@ class BagDetect():
                         cv2.namedWindow(str(p), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
                         cv2.resizeWindow(str(p), im0.shape[1], im0.shape[0])
                     cv2.imshow(str(p), im0)
-                    cv2.waitKey(1)  # 1 millisecond
+                    #cv2.waitKey(1)  # 1 millisecond
 
                 # Save results (image with detections)
                 if save_img:
@@ -360,6 +360,10 @@ class BagDetect():
             #print("s=" + str(s))
             # Print time (inference-only)
             LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
+
+
+        vid_cap.release()
+        cv2.destroyAllWindows()
 
         # Print results
         t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
