@@ -65,7 +65,7 @@ class CarryMyLuggage():
         c.distance = global_distance
         self.move_pub.publish(c)
 
-    def go_near(self, move_mode="front", approach_distance=0.8, lidar_ignore="no"):
+    def go_near(self, move_mode="front", approach_distance=0.8, lidar_ignore="no", is_paper=False):
         #self.audio_pub.publish("おはよ") #audio.pyを動かす時に、引数として発言させたいものを入れる
         
         #Yolo information
