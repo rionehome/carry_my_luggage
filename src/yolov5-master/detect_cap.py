@@ -55,7 +55,12 @@ from utils.general import (LOGGER, Profile, check_file, check_img_size, check_im
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, smart_inference_mode
 
+from carry_my_luggage.msg import PaperDetect
 
+
+
+
+    
 @smart_inference_mode()
 def run(
         weights=ROOT / 'yolov5s.pt',  # model path or triton URL
@@ -99,6 +104,7 @@ def run(
     紙袋の距離と方向の出版者を作る。
     """
 
+    paper_pub = rospy.Publisher("/paper", PaperDetect, queue_size=1)
 
 
 
@@ -142,10 +148,10 @@ def run(
 
         #1回だけ画像の幅と高さを取得する
         if get_count == 0:
+
             im_height, im_width = im.shape[2:]
             get_count = 1
 
-        #print("リアルタイムで動いている")
 
         with dt[0]:
             im = torch.from_numpy(im).to(model.device)
@@ -212,7 +218,8 @@ def run(
                     cam_pprbg_dis = 3
                     cam_pprbg_drct = 3
                     print("紙袋が見つかりません。")
-                    #探す
+                    
+                    
 
                
                 #紙袋かとってのいづれかが検出されたとき
@@ -307,10 +314,15 @@ def run(
 
             #yield cam_pprbg_dis, cam_pprbg_drct
 
-            """
-            紙袋の距離と方向を出版する
             
-            """
+
+            p = PaperDetect()
+            p.robo_p_dis = cam_pprbg_dis
+            p.robo_p_drct = cam_pprbg_drct
+            # p.p_exist = person_count
+            paper_pub.publish(p)
+            
+            
             
             print("\n")
 

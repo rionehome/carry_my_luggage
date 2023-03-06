@@ -31,8 +31,10 @@ class CarryMyLuggage():
 
         # for camera
         self.switch_pub = rospy.Publisher("/switch_camera", String, queue_size=1)
+            
         self.finger_sub = rospy.Subscriber("/finger_res", String, self.finger_cb)
         self.finger_res = ""
+
         # for speechToText
 
         self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
