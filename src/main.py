@@ -4,7 +4,7 @@
 from ast import Str
 import rospy
 from std_msgs.msg import String, Float32
-from carry_my_luggage.msg import MoveAction, LidarData, PersonDetect
+from carry_my_luggage.msg import MoveAction, LidarData, PersonDetect, PaperDetect
 from carry_my_luggage.srv import Camera_msg, MoveArm, SpeechToText, isMeaning
 
 import time
@@ -35,8 +35,10 @@ class CarryMyLuggage():
 
         # for camera
         self.switch_pub = rospy.Publisher("/switch_camera", String, queue_size=1)
+            
         self.finger_sub = rospy.Subscriber("/finger_res", String, self.finger_cb)
         self.finger_res = ""
+
         # for speechToText
 
         self.speechToText = rospy.ServiceProxy("/speechToText", SpeechToText )
@@ -95,7 +97,13 @@ class CarryMyLuggage():
             switch = String()
             switch.data = "person"
             self.switch_pub.publish(switch)
-            detectData = rospy.wait_for_message('/person', PersonDetect)
+
+            if (is_paper):
+                detectData = rospy.wait_for_message('/paper', PaperDetect)
+                
+            else:
+                detectData = rospy.wait_for_message('/person', PersonDetect)
+
             p_direction = detectData.robo_p_drct
             p_distance = detectData.robo_p_dis
             
@@ -146,7 +154,7 @@ class CarryMyLuggage():
                     c.distance = "stop"
                     global_distance = "stop"
                     self.move_pub.publish(c)
-                count_time += 1
+                # count_time += 1
                 
             # elif global_distance == "stop":
             #     c.distance = "forward"
@@ -233,6 +241,7 @@ class CarryMyLuggage():
     def main(self): #@←これをまだできていないコードの部分のチェックマークとする
         # wait for nodes
         time.sleep(3)
+        self.audio_pub.publish("テスト")
         # rospy.wait_for_service("/isMeaning")
         # # im = isMeaning()
         # res = self.isMeaning("test",["test"])
@@ -270,10 +279,12 @@ class CarryMyLuggage():
         #@(制御)bag_detect.pyで、紙袋を検知しているかを変数bag_existとする.存在したらFalse,存在しなかったらTrueとする
 
 
+
         self.audio_pub.publish("紙袋を探しています。")
-        self.audio_pub.publish("かみぶくろをはっけんしました。紙袋に向かって進みます")
+
 
         bag_exist = False #test
+
         while bag_exist:
             m = MoveAction()
             m.time = 0.1
@@ -283,6 +294,9 @@ class CarryMyLuggage():
             m.angle_speed = -1 * ANGULAR_SPEED #カメラの向きが逆のため、マイナスにする
             self.move_pub.publish(m)
             #@(制御)おそらく、ここでbag_existの状態を更新する
+        self.audio_pub.publish("かみぶくろをはっけんしました。紙袋に向かって進みます")
+
+        self.go_near("back", 0.5, "no", True)
 
         switch.data = "person"
         self.switch_pub.publish(switch)
@@ -292,7 +306,7 @@ class CarryMyLuggage():
         
 #カバンの持ち手が持てるように移動する
         #publishする前後と回転の方向を逆にする（カメラの向きに移動するため）(move_mode)
-        #@(画像)YoLoでカバンの輪っかに対面する場所に認識させる
+        #@(画像)YoLoでカバンの輪っかに対面するPaper場所に認識させる
         #カバンとの距離を決めておいた距離にする(approach_distance) 
         self.go_near(move_mode="back", approach_distance=1.0)
         self.audio_pub.publish("かばんの場所に到着しました。かばんを掴みます。")#test
