@@ -9,7 +9,6 @@ from carry_my_luggage.srv import Camera_msg, MoveArm, SpeechToText, isMeaning
 
 import time
 import sys
-import os
 from math import pi
 print(sys.version.split()[0])
 
@@ -29,7 +28,8 @@ class CarryMyLuggage():
         self.move_pub = rospy.Publisher("/move", MoveAction, queue_size=1)
 
         # for robot arm manipulation
-        rospy.wait_for_service("/move_arm")
+
+        
         # for audio
         self.audio_pub = rospy.Publisher("/audio", String, queue_size=1)
 
@@ -241,6 +241,7 @@ class CarryMyLuggage():
     def main(self): #@←これをまだできていないコードの部分のチェックマークとする
         # wait for nodes
         time.sleep(3)
+        print("main")
         self.audio_pub.publish("テスト")
         # rospy.wait_for_service("/isMeaning")
         # # im = isMeaning()
@@ -393,6 +394,7 @@ class CarryMyLuggage():
 
 
 if __name__ == '__main__':
+    print("__name__")
     carryMyLuggage = CarryMyLuggage()
     carryMyLuggage.main()
     
