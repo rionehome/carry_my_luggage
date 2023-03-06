@@ -25,27 +25,27 @@ res = ser(23, 5, 10, 4)
 print(res.res)
 
 # のばしてぇーの〜
-res = ser(35, 7, 10, 4)
+res = ser(35, 8, 10, 4)
 print(res.res)
 
 # とじるっ！
-res = ser(35, 7, 10, 2)
+res = ser(35, 8, 10, 2)
 print(res.res)
 
 # ひっかける！
-res = ser(37, 7, 30, 2)
+res = ser(36, 11, 30, 2)
 print(res.res)
 
 # もちあげてからの〜
-res = ser(30, 20, 30, 2)
+res = ser(27, 25, 30, 2)
 print(res.res)
 
 # おろす
-res = ser(35, 7, 10, 2)
+res = ser(35, 10, 15, 2)
 print(res.res)
 
 # ほんではなす
-res = ser(35, 7, 10, 4)
+res = ser(33, 10, 10, 4)
 print(res.res)
 
 # 初期位置
