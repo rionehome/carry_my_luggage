@@ -6,14 +6,15 @@ from geometry_msgs.msg import Twist
 from carry_my_luggage.msg import MoveAction
 import time
 
-LINEAR_SPEED = 0.15 # m/s
-ANGULAR_SPEED = 0.5 # m/s
+LINEAR_SPEED = 0.15  # m/s
+ANGULAR_SPEED = 0.5  # m/s
 
-class Move():
+
+class Move:
     def __init__(self):
         self.pub = rospy.Publisher("/cmd_vel_mux/input/teleop", Twist, queue_size=1)
         self.sub = rospy.Subscriber("/move", MoveAction, self.callback)
-    
+
     def callback(self, msg):
         twist = Twist()
 
@@ -21,7 +22,7 @@ class Move():
         if msg.direction == "left":
             twist.angular.z = msg.angle_speed
         elif msg.direction == "right":
-            twist.angular.z = - 1 * msg.angle_speed
+            twist.angular.z = -1 * msg.angle_speed
         # if msg.direction == "stop":
         #     twist.linear.x = 0
         #     twist.angular.z = 0
@@ -43,8 +44,7 @@ class Move():
         # elif msg.distance == "normal":
         #     twist.linear.x = msg.speed
         #     twist.angular.z = 0
-        #normalのときは何もしない
-        
+        # normalのときは何もしない
 
         start_time = time.time()
         target_time = msg.time
@@ -53,7 +53,8 @@ class Move():
             self.pub.publish(twist)
             rospy.Rate(30).sleep()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     rospy.init_node("move")
     move = Move()
     while not rospy.is_shutdown():

@@ -14,13 +14,13 @@ capture = cv2.VideoCapture(device_number)
 while True:
     color_frame = pipeline.wait_for_frames().get_color_frame()
     color_image = np.asanyarray(color_frame.get_data())
-    
+
     ret, frame = capture.read()
     if ret:
-        cv2.imshow('RealSense Camera', color_image)
-        cv2.imshow('OpenCV Camera', frame)
-    
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+        cv2.imshow("RealSense Camera", color_image)
+        cv2.imshow("OpenCV Camera", frame)
+
+    if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
 pipeline.stop()
