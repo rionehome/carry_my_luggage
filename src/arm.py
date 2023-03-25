@@ -8,24 +8,25 @@ import sys
 from math import pi
 
 # names of group and joint
-arm_planning_group = 'arm'
-arm_joint_names = ['joint1', 'joint2', 'joint3', 'joint4']
-gripper_planning_group = 'gripper'
-gripper_joint_names = ['gripper']
+arm_planning_group = "arm"
+arm_joint_names = ["joint1", "joint2", "joint3", "joint4"]
+gripper_planning_group = "gripper"
+gripper_joint_names = ["gripper"]
 
-class Arm():
+
+class Arm:
     def __init__(self):
         rospy.init_node("arm")
 
         self.sub = rospy.Subscriber("/arm", ArmAction, self.callback)
 
-        rospy.wait_for_service('/goal_joint_space_path')
-        rospy.wait_for_service('/goal_tool_control')
-    
+        rospy.wait_for_service("/goal_joint_space_path")
+        rospy.wait_for_service("/goal_tool_control")
+
     def move_arm(self, position, planning_time=3.0):
-        service = rospy.ServiceProxy('/goal_joint_space_path', SetJointPosition)
+        service = rospy.ServiceProxy("/goal_joint_space_path", SetJointPosition)
         request = SetJointPositionRequest()
-        
+
         request.planning_group = arm_planning_group
         request.joint_position.joint_name = arm_joint_names
         request.joint_position.position = position
@@ -34,11 +35,11 @@ class Arm():
         request.path_time = planning_time
 
         service(request)
-    
+
     def move_gripper(self, action, planning_time=4.0):
-        service = rospy.ServiceProxy('/goal_tool_control', SetJointPosition)
+        service = rospy.ServiceProxy("/goal_tool_control", SetJointPosition)
         request = SetJointPositionRequest()
-        
+
         # position 0.01 - -0.01
         if action == 0:
             position = [-0.01]
@@ -70,7 +71,8 @@ class Arm():
             self.move_arm(msg.joint)
             self.move_gripper(msg.gripper)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     arm = Arm()
     while not rospy.is_shutdown():
         rospy.Rate(10).sleep()

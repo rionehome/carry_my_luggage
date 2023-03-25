@@ -7,11 +7,12 @@ import math
 
 PIZZA = 24
 
-class Lidar():
+
+class Lidar:
     def __init__(self):
-        self.pub = rospy.Publisher('/lidar', LidarData, queue_size=1)
+        self.pub = rospy.Publisher("/lidar", LidarData, queue_size=1)
         self.main()
-        
+
     def remove_inf(self, ranges):
         f_ranges = []
         for i in ranges:
@@ -19,9 +20,9 @@ class Lidar():
                 f_ranges.append(i)
 
         return f_ranges
-    
+
     def get_distance(self):
-        scan = rospy.wait_for_message('/scan', LaserScan)
+        scan = rospy.wait_for_message("/scan", LaserScan)
         # rospy.loginfo(scan)
 
         distance = []
@@ -41,25 +42,25 @@ class Lidar():
         # rospy.loginfo(distance)
 
         return distance
-    
+
     def get_direction(self, ranges):
         mn = min(ranges)
         mn_index = ranges.index(mn)
-        
+
         if mn_index <= 5 or mn_index >= 18:
             front_back = "front"
         else:
             front_back = "back"
-        
+
         if mn_index <= 11:
             left_right = "left"
         else:
             left_right = "right"
-            
+
         direction = [front_back, left_right]
-        
+
         return direction
-        
+
     def main(self):
         while not rospy.is_shutdown():
             l = LidarData()
@@ -72,7 +73,6 @@ class Lidar():
             rospy.Rate(10).sleep()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     rospy.init_node("lidar")
     lidar = Lidar()
-    
