@@ -1,6 +1,3 @@
-[submodule "speech_and_NLP"]
-	path = speech_and_NLP
+[submodule "src/speech_and_NLP"]
+	path = src/speech_and_NLP
 	url = git@github.com:rionehome/speech_and_NLP.git
-[submodule "hand_detect"]
-	path = hand_detect
-	url = git@github.com:rionehome/hand_detect.git
