@@ -13,7 +13,7 @@ ser = rospy.ServiceProxy("/move_arm", MoveArm)
 # MoveArm.y: 目標座標のy(cm)
 # MoveArm.dig: 手先の角度(度)
 # MoveArm.grip: 握り具合0〜4の整数値, 0->close, 4->open
-# 
+#
 # MoveArm.res: rosserviceの戻り値, 0->正常終了, -1->エラー終了
 
 # 初期位置
