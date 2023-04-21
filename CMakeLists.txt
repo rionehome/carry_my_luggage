@@ -25,6 +25,9 @@ add_service_files(
   FILES
   Camera_msg.srv
   MoveArm.srv
+  SpeechToText.srv
+  TextToSpeech.srv
+  isMeaning.srv
 )
 
 generate_messages(
