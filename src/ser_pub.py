@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import rospy
+
 from carry_my_luggage.srv import MoveArm
 
 rospy.wait_for_service("/move_arm")

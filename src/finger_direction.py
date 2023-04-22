@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
+
 import cv2
 import mediapipe as mp
-
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -25,9 +25,7 @@ def get_direction(n):
 
         image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
         image.flags.writeable = False
-        results = mp_hands.Hands(
-            min_detection_confidence=0.5, min_tracking_confidence=0.5
-        ).process(image)
+        results = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5).process(image)
         image.flags.writeable = True
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
