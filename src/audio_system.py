@@ -16,7 +16,7 @@ class AudioSystem():
     
     def tts_callback(self, msg):
         rospy.loginfo("audio_system: Speaking {}".format(msg.text))
-        textToSpeech(text=msg.text, gTTS_lang="en") 
+        textToSpeech(text=msg.text)
         return True
     
     def stt_callback(self, msg):
