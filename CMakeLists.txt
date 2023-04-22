@@ -6,12 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
 )
-add_service_files(
-  FILES
-  isMeaning.srv
-  MoveArm.srv
-  SpeechToText.srv
-)
 
 add_message_files(
   FILES
@@ -27,7 +21,7 @@ add_service_files(
   MoveArm.srv
   SpeechToText.srv
   TextToSpeech.srv
-  isMeaning.srv
+  IsMeaning.srv
 )
 
 generate_messages(
