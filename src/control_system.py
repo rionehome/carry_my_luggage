@@ -4,6 +4,9 @@
 import rospy
 from geometry_msgs.msg import Twist
 
+MAX_X_SPEED = 0.3
+MAX_Z_SPEED = 1
+
 class ControlSystem():
     def __init__(self):
         rospy.init_node("control_system")
@@ -15,17 +18,17 @@ class ControlSystem():
         z = msg.angular.z
 
         # limit speed to prevent accident
-        if abs(x) > 0.3:
+        if abs(x) > MAX_X_SPEED:
             if x > 0:
-                msg.linear.x = 0.3
+                msg.linear.x = MAX_X_SPEED
             elif x < 0:
-                msg.linear.x = -0.3
+                msg.linear.x = MAX_X_SPEED * -1
 
-        if abs(z) > 1:
+        if abs(z) > MAX_Z_SPEED:
             if z > 0:
-                msg.angular.z = 1
+                msg.angular.z = MAX_Z_SPEED
             elif z < 0:
-                msg.angular.z = -1
+                msg.angular.z = MAX_Z_SPEED * -1
 
         self.velocity_pub.publish(msg)
 
