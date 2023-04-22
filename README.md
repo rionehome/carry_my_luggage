@@ -113,3 +113,10 @@ python3 -m pip install -r requirements.txt
 ```sh
 pre-commit install --install-hooks
 ```
+
+### editorconfig
+
+VSCode, VSCodiumは拡張機能をインストールする
+
+- VSCode https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig
+- VSCodium https://open-vsx.org/extension/EditorConfig/EditorConfig
