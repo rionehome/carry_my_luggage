@@ -64,7 +64,7 @@ rosdep install -r --from-path src --ignore-src
 git submodule update --init
 git submodule foreach git pull origin main
 ```
-+ Ubuntuの場合 
++ Ubuntuの場合
 ```
 cd speech_and_NLP
 sh setup.sh
@@ -75,7 +75,7 @@ pip install -r requirements.txt
 
 or
 
-pip3 ~~~ 
+pip3 ~~~
 ```
 
 `cmake ffmpeg mecab libportaudio2 python-pyaudio` をインストール
@@ -83,7 +83,7 @@ pip3 ~~~
 sudo apt install cmake ffmpeg python-pyaudio mecab libportaudio2 -y
 ```
 
-## 使い方
+#### 使い方
 
 + isMeaning
 ```python
@@ -100,4 +100,16 @@ self.audio_pub.publish("発話させたい音声")
 rospy.wait_for_service("/speechToText")
 res = self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
 res.resにテキストが入る
+```
+
+### pre-commit
+
+```sh
+python3 -m pip install pre-commit
+```
+
+`carry_my_luggage`の中で
+
+```sh
+pre-commit install --install-hooks
 ```
