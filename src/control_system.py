@@ -14,6 +14,19 @@ class ControlSystem():
         x = msg.linear.x
         z = msg.angular.z
 
+        # limit speed to prevent accident
+        if abs(x) > 0.3:
+            if x > 0:
+                msg.linear.x = 0.3
+            elif x < 0:
+                msg.linear.x = -0.3
+
+        if abs(z) > 1:
+            if z > 0:
+                msg.angular.z = 1
+            elif z < 0:
+                msg.angular.z = -1
+
         self.velocity_pub.publish(msg)
 
 if __name__ == "__main__":
