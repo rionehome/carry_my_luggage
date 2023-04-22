@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import rospy
-from carry_my_luggage.srv import SpeechToText, isMeaning, TextToSpeech
+from carry_my_luggage.srv import SpeechToText, IsMeaning, TextToSpeech
 from speech_and_NLP.src.textToSpeech import textToSpeech
 from speech_and_NLP.src.speechToText import recognize_speech
 # from speech_and_NLP.src.tools.speech_to_text.isMeaning import is_meaning
@@ -12,7 +12,7 @@ class AudioSystem():
         rospy.init_node("audio_system")
         self.tts_srv = rospy.Service("/audio_system/text_to_speech", TextToSpeech, self.tts_callback)
         self.sst_srv = rospy.Service("/audio_system/speech_to_text", SpeechToText, self.stt_callback)
-        self.is_meaning_srv = rospy.Service("/audio_system/is_meaning", isMeaning, self.is_meaning_callback)
+        self.is_meaning_srv = rospy.Service("/audio_system/is_meaning", IsMeaning, self.is_meaning_callback)
     
     def tts_callback(self, msg):
         rospy.loginfo("audio_system: Speaking {}".format(msg.text))
