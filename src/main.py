@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from ast import Str
-import rospy
-from std_msgs.msg import String, Float32
-from carry_my_luggage.msg import MoveAction, LidarData, PersonDetect
-from carry_my_luggage.srv import Camera_msg, MoveArm, SpeechToText, isMeaning
-
-import time
-import sys
 import os
+import sys
+import time
+from ast import Str
 from math import pi
+
+import rospy
+from std_msgs.msg import Float32, String
+
+from carry_my_luggage.msg import LidarData, MoveAction, PersonDetect
+from carry_my_luggage.srv import Camera_msg, MoveArm, SpeechToText, isMeaning
 
 print(sys.version.split()[0])
 
@@ -67,9 +68,7 @@ class CarryMyLuggage:
             #     return
 
             # lidar information
-            lidarData = rospy.wait_for_message(
-                "/lidar", LidarData
-            )  # lidar.pyから一つのデータが送られてくるまで待つ
+            lidarData = rospy.wait_for_message("/lidar", LidarData)  # lidar.pyから一つのデータが送られてくるまで待つ
             distance = lidarData.distance
             print(distance)
             mn = min(distance)
@@ -207,9 +206,7 @@ class CarryMyLuggage:
 
         print(fingerDirection)
 
-        self.audio_pub.publish(
-            ("右" if fingerDirection == "Right" else "左") + "に向かって紙袋を探します。"
-        )
+        self.audio_pub.publish(("右" if fingerDirection == "Right" else "左") + "に向かって紙袋を探します。")
         time.sleep(3)
         switch.data = "realsence"
         self.switch_pub.publish(switch)

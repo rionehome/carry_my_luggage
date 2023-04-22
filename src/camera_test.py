@@ -1,6 +1,6 @@
 import cv2
-import pyrealsense2 as rs
 import numpy as np
+import pyrealsense2 as rs
 
 pipeline = rs.pipeline()
 config = rs.config()

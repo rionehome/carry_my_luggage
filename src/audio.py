@@ -3,19 +3,17 @@
 
 import rospy
 from std_msgs.msg import String
-from carry_my_luggage.srv import SpeechToText, isMeaning
 
+from carry_my_luggage.srv import SpeechToText, isMeaning
 from speech_and_NLP.src.speechToText import recognize_speech
-from speech_and_NLP.src.tools.speech_to_text.isMeaning import is_meaning
 from speech_and_NLP.src.textToSpeech import textToSpeech
+from speech_and_NLP.src.tools.speech_to_text.isMeaning import is_meaning
 
 
 class Audio:
     def __init__(self):
         self.sub = rospy.Subscriber("/audio", String, self.callback)
-        self.speechToTextSrv = rospy.Service(
-            "/speechToText", SpeechToText, self.calbkSTT
-        )
+        self.speechToTextSrv = rospy.Service("/speechToText", SpeechToText, self.calbkSTT)
         self.isMeaningSrv = rospy.Service("/isMeaning", isMeaning, self.calbkIsMeaning)
 
     def calbkIsMeaning(self, msg):
