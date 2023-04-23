@@ -81,6 +81,7 @@ def get_direction(n):
                     wrist = hand_landmarks.landmark[0]
                     thumb_tip = hand_landmarks.landmark[4]
                     index_tip = hand_landmarks.landmark[8]
+                    mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                     if index_tip.x < wrist.x:
                         if direction != "Left":
                             left_count = 1
