@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
-
 import cv2
 import mediapipe as mp
-
-mp_drawing = mp.solutions.drawing_utils
-mp_hands = mp.solutions.hands
 
 
 def get_direction(n):
@@ -44,6 +39,8 @@ def get_direction(n):
                         else:
                             right_count += 1
                             if right_count >= n:
+                                cap.release()
+                                cv2.destroyAllWindows()
                                 return "Right"
                     else:
                         if direction != "Left":
@@ -53,6 +50,8 @@ def get_direction(n):
                         else:
                             left_count += 1
                             if left_count >= n:
+                                cap.release()
+                                cv2.destroyAllWindows()
                                 return "Left"
                 else:
                     if left_wrist.y < right_wrist.y:
@@ -63,6 +62,8 @@ def get_direction(n):
                         else:
                             right_count += 1
                             if right_count >= n:
+                                cap.release()
+                                cv2.destroyAllWindows()
                                 return "Right"
                     else:
                         if direction != "Left":
@@ -72,6 +73,8 @@ def get_direction(n):
                         else:
                             left_count += 1
                             if left_count >= n:
+                                cap.release()
+                                cv2.destroyAllWindows()
                                 return "Left"
             else:
                 for hand_landmarks in results.multi_hand_landmarks:
@@ -86,6 +89,8 @@ def get_direction(n):
                         else:
                             left_count += 1
                             if left_count >= n:
+                                cap.release()
+                                cv2.destroyAllWindows()
                                 return "Left"
                     else:
                         if direction != "Right":
@@ -95,12 +100,11 @@ def get_direction(n):
                         else:
                             right_count += 1
                             if right_count >= n:
+                                cap.release()
+                                cv2.destroyAllWindows()
                                 return "Right"
 
         cv2.imshow("MediaPipe Hands", image)
         if cv2.waitKey(5) & 0xFF == 27:
             break
     cap.release()
-
-
-# print(get_direction(10))
