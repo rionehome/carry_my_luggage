@@ -4,7 +4,7 @@
 import rospy
 
 from carry_my_luggage.srv import HandDirection
-from finger_direction import get_direction
+from hand_direction import get_direction
 
 
 class ImageSystem:
