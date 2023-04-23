@@ -22,6 +22,7 @@ add_service_files(
   SpeechToText.srv
   TextToSpeech.srv
   IsMeaning.srv
+  HandDirection.srv
 )
 
 generate_messages(
