@@ -1,7 +1,0 @@
-bool print_partial
-int16 use_break
-int16 return_extract_person_name
-bool remove_space
-int16 voskLogLevel
----
-string res

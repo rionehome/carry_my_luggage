@@ -101,3 +101,32 @@ rospy.wait_for_service("/speechToText")
 res = self.speechToText(中間テキスト表示非表示を設定(bool), 最低文字数, 名前のみ抽出するか(bool), 空白取り除くか(bool), voskLogLevel(-1でいいです))
 res.resにテキストが入る
 ```
+
+### img_tasks内のファイルの詳細
+
++ Pythonファイル
+```
+glasses_detect.py   眼鏡の検出
+pprbg_detect.py     紙袋の検出
+person_detect_dd.py 人の検出(改良)
+person_detect.py    人の検出(従来)
+```
+
++ ptファイル(学習済モデルの重み)
+```
+yolov5s.pt 既存のyoloモデル  　             人の検出用
+19sbest_glasses.pt 転移学習させたyoloモデル 眼鏡の検出用
+22sbest_pprbg.pt   転移学習させたyoloモデル 紙袋用
+```
+
++ 環境構築
+
+```shell
+yolov5のレポジトリを持ってくる
+git clone https://github.com/ultralytics/yolov5.git
+```
+
+```python
+model = torch.hub.load('yolov5の絶対Path(~/yolov5)', 'custom', path='22sbest_pprbg.pt', source='local')
+```
+
