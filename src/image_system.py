@@ -23,15 +23,22 @@ class ImageSystem:
         self.hand_direction_srv = rospy.Service(
             "/image_system/hand_direction", HandDirection, self.hand_direction_callback
         )
-        self.person_detect_command_sub = rospy.Subscriber(
-            "/image_system/person_detect/switch", String, self.person_detect_command_callback
+
+        self.person_detect_switch_sub = rospy.Subscriber(
+            "/image_system/person_detect/switch", String, self.person_detect_switch_callback
         )
+
+        self.person_detect_direction_pub = rospy.Publisher(
+            "/image_system/person_detect/direction", String, queue_size=1
+        )
+
+        self.person_detect_distance_pub = rospy.Publisher("/image_system/person_detect/distance", String, queue_size=1)
 
     def hand_direction_callback(self, msg):
         rospy.loginfo("image_system: detecting hand direction")
         return get_direction(msg.n)
 
-    def person_detect_command_callback(self, msg):
+    def person_detect_switch_callback(self, msg):
         if msg.data == "on" and self.is_person_detect_on == False:
             self.is_person_detect_on = True
             self.cap = cv2.VideoCapture(0)
@@ -109,29 +116,63 @@ class ImageSystem:
                         c_x = (xmax + xmin) / 2  # 矩形の中心のx座標
                         c_y = (ymax + ymin) / 2  # 矩形の中心のy座標
 
-                        if w < 350:
-                            # print(str(i) + "番目の人が遠い")
-                            robo_p_dis = 0  # ロボットは人が中央に来るまで前に進む
+                        WIDTH = 640
+                        HEIGHT = 480
 
-                        elif w >= 350 and w <= 550:
-                            # print(str(i) + "番目の人が中央の距離")
-                            robo_p_dis = 1  # ロボットはそのまま
+                        if c_x >= 0 and c_x <= WIDTH * (1 / 3):
+                            print("left")
+                            self.person_detect_direction_pub.publish("left")
+                        elif c_x < WIDTH and c_x <= WIDTH * (2 / 3):
+                            print("center")
+                            self.person_detect_direction_pub.publish("center")
+                        else:
+                            print("right")
+                            self.person_detect_direction_pub.publish("right")
 
-                        elif w > 550:
-                            # print(str(i) + "番目の人が近い")
-                            robo_p_dis = 2  # ロボットは人が中央に来るまで後ろに下がる
+                        if h >= 450:
+                            print("close")
+                            self.person_detect_distance_pub.publish("close")
+                        elif h > 350 and h < 450:
+                            print("middle")
+                            self.person_detect_distance_pub.publish("middle")
+                        elif h <= 350:
+                            print("far")
+                            self.person_detect_distance_pub.publish("far")
 
-                        if c_x < width / 3:
-                            # print(str(i) + "番目の人が左にいる")
-                            robo_p_drct = 0  # ロボットは人が中央に来るまで左回りする
+                        # if w < 350:
+                        #     # print(str(i) + "番目の人が遠い")
+                        #     robo_p_dis = 0  # ロボットは人が中央に来るまで前に進む
 
-                        elif c_x > width / 3 and c_x < width * 2 / 3:
-                            # print(str(i) + "番目の人が中央の方向")
-                            robo_p_drct = 1  # ロボットはそのまま
+                        # elif w >= 350 and w <= 550:
+                        #     # print(str(i) + "番目の人が中央の距離")
+                        #     robo_p_dis = 1  # ロボットはそのまま
 
-                        elif c_x > width * 2 / 3:
-                            # print(str(i) + "番目の人が右にいる")
-                            robo_p_drct = 2  # ロボットは人が中央に来るまで右回りする
+                        # elif w > 550:
+                        #     # print(str(i) + "番目の人が近い")
+                        #     robo_p_dis = 2  # ロボットは人が中央に来るまで後ろに下がる
+
+                        # if c_x < width / 3:
+                        #     # print(str(i) + "番目の人が左にいる")
+                        #     robo_p_drct = 0  # ロボットは人が中央に来るまで左回りする
+
+                        # elif c_x > width / 3 and c_x < width * 2 / 3:
+                        #     # print(str(i) + "番目の人が中央の方向")
+                        #     robo_p_drct = 1  # ロボットはそのまま
+
+                        # elif c_x > width * 2 / 3:
+                        #     # print(str(i) + "番目の人が右にいる")
+                        #     robo_p_drct
+
+                        print("=====")
+                        print("距離=" + str(robo_p_dis))
+                        print("方向=" + str(robo_p_drct))
+                        print("w", w)
+                        print("h", h)
+                        print("c_x", c_x)
+                        print("c_y", c_y)
+                        print("=====")
+
+                    # ロボットは人が中央に来るまで右回りする
 
                     # print("距離:" + str(robo_p_dis) + "、方向:" + str(robo_p_drct))
                     # print("(x_min=" + str(xmin) + ", y_min=" + str(ymin) + ")" + "(x_max=" + str(xmax) + ", y_max=" + str(ymax) + ")")
@@ -139,11 +180,6 @@ class ImageSystem:
                     # print("名前" + str(name) + "幅:" + str(w) + ", 高さ:" + str(h))
 
             person_count = 0  # 判定するための変数を初期化する
-
-            print("=====")
-            print("距離=" + str(robo_p_dis))
-            print("方向=" + str(robo_p_drct))
-            print("=====")
 
             """
             ここで、距離と方向をPublishしてほしい。
