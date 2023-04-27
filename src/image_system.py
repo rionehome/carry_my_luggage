@@ -10,6 +10,9 @@ from std_msgs.msg import String
 from carry_my_luggage.srv import HandDirection
 from hand_direction import get_direction
 
+WIDTH = 640
+HEIGHT = 480
+
 
 class ImageSystem:
     def __init__(self):
@@ -116,9 +119,6 @@ class ImageSystem:
                         c_x = (xmax + xmin) / 2  # 矩形の中心のx座標
                         c_y = (ymax + ymin) / 2  # 矩形の中心のy座標
 
-                        WIDTH = 640
-                        HEIGHT = 480
-
                         if c_x >= 0 and c_x <= WIDTH * (1 / 3):
                             print("left")
                             self.person_detect_direction_pub.publish("left")
@@ -180,10 +180,6 @@ class ImageSystem:
                     # print("名前" + str(name) + "幅:" + str(w) + ", 高さ:" + str(h))
 
             person_count = 0  # 判定するための変数を初期化する
-
-            """
-            ここで、距離と方向をPublishしてほしい。
-            """
 
             # バウンディングボックスを描画
             result.render()
