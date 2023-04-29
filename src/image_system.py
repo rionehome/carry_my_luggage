@@ -31,10 +31,6 @@ class ImageSystem:
         self.person_detect_switch_sub = rospy.Subscriber(
             "/image_system/person_detect/switch", String, self.person_detect_switch_callback
         )
-        self.person_detect_direction_pub = rospy.Publisher(
-            "/image_system/person_detect/direction", String, queue_size=1
-        )
-        self.person_detect_distance_pub = rospy.Publisher("/image_system/person_detect/distance", String, queue_size=1)
         self.person_detect_result_pub = rospy.Publisher(
             "/image_system/person_detect/result", PersonDetect, queue_size=1
         )
@@ -131,8 +127,6 @@ class ImageSystem:
                 elif h <= 350:
                     distance.append("far")
 
-            # self.person_detect_direction_pub.publish(direction)
-            # self.person_detect_distance_pub.publish(distance)
         p = PersonDetect()
         p.count = count
         p.direction = direction
