@@ -19,13 +19,13 @@ class ImageSystem:
         matplotlib.use("Agg")  # fix weird Gtk 2 error
         rospy.init_node("image_system")
 
-        self.is_person_detect_on = False
-
-        self.person_detect_model = torch.hub.load("ultralytics/yolov5", "yolov5s")
-
         self.hand_direction_srv = rospy.Service(
             "/image_system/hand_direction", HandDirection, self.hand_direction_callback
         )
+
+        self.is_person_detect_on = False
+
+        self.person_detect_model = torch.hub.load("ultralytics/yolov5", "yolov5s")
 
         self.person_detect_switch_sub = rospy.Subscriber(
             "/image_system/person_detect/switch", String, self.person_detect_switch_callback
@@ -36,6 +36,19 @@ class ImageSystem:
         )
 
         self.person_detect_distance_pub = rospy.Publisher("/image_system/person_detect/distance", String, queue_size=1)
+
+        self.is_paperbag_detect_on = False
+
+        self.person_detect_switch_sub = rospy.Subscriber(
+            "/image_system/paperbag_detect/switch", String, self.paperbag_detect_switch_callback
+        )
+        self.paperbag_detect_model = torch.hub.load(
+            "/home/ri-one/yolov5/",
+            "custom",
+            path="/home/ri-one/catkin_ws/src/carry_my_luggage/22sbest_pprbg.pt",
+            source="local",
+            force_reload=True,
+        )
 
     def hand_direction_callback(self, msg):
         rospy.loginfo("image_system: detecting hand direction")
@@ -140,6 +153,22 @@ class ImageSystem:
             cv2.imshow("result", result.ims[0])
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 return
+
+    def paperbag_detect_switch_callback(self, msg):
+        if msg.data == "on" and self.is_paperbag_detect_on == False:
+            self.is_paperbag_detect_on = True
+            self.cap = cv2.VideoCapture(0)
+        elif msg.data == "off" and self.is_paperbag_detect_on == True:
+            self.is_paperbag_detect_on = False
+            self.cap.release()
+            cv2.destroyAllWindows()
+
+        if self.is_paperbag_detect_on:
+            self.paperbag_detect()
+
+    def paperbag_detect(self):
+        rospy.loginfo("code here")
+        pass
 
 
 if __name__ == "__main__":
