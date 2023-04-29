@@ -19,26 +19,24 @@ class ImageSystem:
         matplotlib.use("Agg")  # fix weird Gtk 2 error
         rospy.init_node("image_system")
 
+        # hand detection
         self.hand_direction_srv = rospy.Service(
             "/image_system/hand_direction", HandDirection, self.hand_direction_callback
         )
 
+        # person detect
         self.is_person_detect_on = False
-
         self.person_detect_model = torch.hub.load("ultralytics/yolov5", "yolov5s")
-
         self.person_detect_switch_sub = rospy.Subscriber(
             "/image_system/person_detect/switch", String, self.person_detect_switch_callback
         )
-
         self.person_detect_direction_pub = rospy.Publisher(
             "/image_system/person_detect/direction", String, queue_size=1
         )
-
         self.person_detect_distance_pub = rospy.Publisher("/image_system/person_detect/distance", String, queue_size=1)
 
+        # paperbag detect
         self.is_paperbag_detect_on = False
-
         self.person_detect_switch_sub = rospy.Subscriber(
             "/image_system/paperbag_detect/switch", String, self.paperbag_detect_switch_callback
         )
