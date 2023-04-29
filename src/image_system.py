@@ -5,8 +5,9 @@ import cv2
 import matplotlib
 import rospy
 import torch
-from std_msgs.msg import String
+from std_msgs.msg import Int16, String
 
+from carry_my_luggage.msg import StringArray
 from carry_my_luggage.srv import HandDirection
 from hand_direction import get_direction
 
@@ -37,15 +38,27 @@ class ImageSystem:
 
         # paperbag detect
         self.is_paperbag_detect_on = False
-        self.person_detect_switch_sub = rospy.Subscriber(
-            "/image_system/paperbag_detect/switch", String, self.paperbag_detect_switch_callback
-        )
         self.paperbag_detect_model = torch.hub.load(
             "/home/ri-one/yolov5/",
             "custom",
             path="/home/ri-one/catkin_ws/src/carry_my_luggage/22sbest_pprbg.pt",
             source="local",
             force_reload=True,
+        )
+        self.person_detect_switch_sub = rospy.Subscriber(
+            "/image_system/paperbag_detect/switch", String, self.paperbag_detect_switch_callback
+        )
+        self.paperbag_detect_paperbag_count_pub = rospy.Publisher(
+            "/image_system/paperbag_detect/paperbag/count", Int16, queue_size=1
+        )
+        self.paperbag_detect_paperbag_direction_pub = rospy.Publisher(
+            "/image_system/paperbag_detect/paperbag/direction", StringArray, queue_size=1
+        )
+        self.paperbag_detect_holding_count_pub = rospy.Publisher(
+            "/image_system/paperbag_detect/holding/count", Int16, queue_size=1
+        )
+        self.paperbag_detect_holding_direction_pub = rospy.Publisher(
+            "/image_system/paperbag_detect/holding/direction", StringArray, queue_size=1
         )
 
     def hand_direction_callback(self, msg):
@@ -175,12 +188,11 @@ class ImageSystem:
         img_c_x = 0  # 画像のx座標の中心位置
         img_c_y = 0  # 画像のy座標の中心位置
 
-        pprbg_count = 0  # メガネが検出されたかどうか
-        put_glss = 0  # 最終的にその人がメガネをかけているかを判定する
+        paperbag_count = 0  # 紙袋の数
+        holding_count = 0  # 紙袋の数
 
         state = "select"  # 鞄をつかむまでの状態
         bag_rl = ""  # 左右のどちらのカバンを追いかけたか
-        track_pprbg_ID = 0  # 左右の鞄のどちらを追いかけるかのID
 
         # select 左右の鞄のいずれかを近づく
         # get 鞄の取手を探してつかむ
@@ -188,22 +200,69 @@ class ImageSystem:
         ret, img = self.cap.read()
         result = self.paperbag_detect_model(img)
 
-        if c == 0:
-            height, width, _ = img.shape[:3]
-            img_cx = width / 2
-            img_cy = height / 2
-            print("高さ=" + str(height))
-            print("幅=" + str(width))
-            c += 1
-
         # 推論結果を取得
         obj = result.pandas().xyxy[0]
+
+        paperbag_direction = []
+        holding_direction = []
 
         # 紙袋が写っているかを調べる holding
         for i in range(len(obj)):
             if obj.name[i] == "paper_bag":
-                pprbg_count += 1
-                break
+                paperbag_count += 1
+
+                xmin = obj.xmin[i]
+                ymin = obj.ymin[i]
+                xmax = obj.xmax[i]
+                ymax = obj.ymax[i]
+
+                xmid = (xmin + xmax) / 2
+                ymid = (ymin + ymax) / 2
+
+                if xmid > 0 and xmid <= WIDTH * (1 / 3):
+                    # print("left")
+                    paperbag_direction.append("left")
+                elif xmid > WIDTH * (1 / 3) and xmid <= WIDTH * (2 / 3):
+                    # print("middle")
+                    paperbag_direction.append("middle")
+                elif xmid > WIDTH * (2 / 3) and xmid < WIDTH:
+                    # print("right")
+                    paperbag_direction.append("right")
+
+            if obj.name[i] == "holding":
+                holding_count += 1
+
+                xmin = obj.xmin[i]
+                ymin = obj.ymin[i]
+                xmax = obj.xmax[i]
+                ymax = obj.ymax[i]
+
+                xmid = (xmin + xmax) / 2
+                ymid = (ymin + ymax) / 2
+
+                if xmid > 0 and xmid <= WIDTH * (1 / 3):
+                    holding_direction.append("left")
+                elif xmid > WIDTH * (1 / 3) and xmid <= WIDTH * (2 / 3):
+                    holding_direction.append("middle")
+                elif xmid > WIDTH * (2 / 3) and xmid < WIDTH:
+                    holding_direction.append("right")
+
+        self.paperbag_detect_paperbag_count_pub.publish(paperbag_count)
+        self.paperbag_detect_holding_count_pub.publish(holding_count)
+
+        s = StringArray()
+        s.strings = paperbag_direction
+        self.paperbag_detect_paperbag_direction_pub.publish(s)
+
+        s = StringArray()
+        s.strings = holding_direction
+        self.paperbag_detect_holding_direction_pub.publish(s)
+
+        result.render()
+        cv2.imshow("result", result.ims[0])
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            return
+        return
 
         # 紙袋が写っていないとき何もしない
 
