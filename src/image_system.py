@@ -104,14 +104,14 @@ class ImageSystem:
 
                 w = xmax - xmin  # 矩形の幅
                 h = ymax - ymin  # 矩形の高さ
-                c_x = (xmax + xmin) / 2  # 矩形の中心のx座標
-                c_y = (ymax + ymin) / 2  # 矩形の中心のy座標
+                xmid = (xmax + xmin) / 2  # 矩形の中心のx座標
+                ymid = (ymax + ymin) / 2  # 矩形の中心のy座標
 
-                if c_x >= 0 and c_x <= WIDTH * (1 / 3):
+                if xmid >= 0 and xmid <= WIDTH * (1 / 3):
                     direction = "left"
-                elif c_x < WIDTH and c_x <= WIDTH * (2 / 3):
+                elif xmid < WIDTH and xmid <= WIDTH * (2 / 3):
                     direction = "center"
-                else:
+                elif xmid > WIDTH * (2 / 3) and xmid < WIDTH:
                     direction = "right"
 
                 if h >= 450:
@@ -121,8 +121,8 @@ class ImageSystem:
                 elif h <= 350:
                     distance = "far"
 
-                self.person_detect_direction_pub.publish(direction)
-                self.person_detect_distance_pub.publish(distance)
+            self.person_detect_direction_pub.publish(direction)
+            self.person_detect_distance_pub.publish(distance)
 
         # バウンディングボックスを描画
         result.render()
