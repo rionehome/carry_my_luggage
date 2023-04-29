@@ -7,7 +7,7 @@ import rospy
 import torch
 from std_msgs.msg import Int16, String
 
-from carry_my_luggage.msg import StringArray
+from carry_my_luggage.msg import PersonDetect, StringArray
 from carry_my_luggage.srv import HandDirection
 from hand_direction import get_direction
 
@@ -35,6 +35,9 @@ class ImageSystem:
             "/image_system/person_detect/direction", String, queue_size=1
         )
         self.person_detect_distance_pub = rospy.Publisher("/image_system/person_detect/distance", String, queue_size=1)
+        self.person_detect_result_pub = rospy.Publisher(
+            "/image_system/person_detect/result", PersonDetect, queue_size=1
+        )
 
         # paperbag detect
         self.is_paperbag_detect_on = False
@@ -80,10 +83,13 @@ class ImageSystem:
     def person_detect(self):
         ret, img = self.cap.read()  # 画像の大きさを取得するために1度だけ最初によびだす。
 
-        person_count = 0  # 人が写っているかどうかを判定するための変数
-
-        direction = ""
-        distance = ""
+        count = 0  # 人が写っているかどうかを判定するための変数
+        direction = []
+        distance = []
+        xmid = []
+        ymid = []
+        width = []
+        height = []
 
         ret, img = self.cap.read()
         result = self.person_detect_model(img)
@@ -94,9 +100,8 @@ class ImageSystem:
         # 人が写っているかを調べる
         for i in range(len(obj)):
             if obj.name[i] == "person":
-                person_count += 1
+                count += 1
 
-                # 人のときだけ計算することで無駄な計算を削減する。
                 xmin = obj.xmin[i]
                 ymin = obj.ymin[i]
                 xmax = obj.xmax[i]
@@ -104,25 +109,39 @@ class ImageSystem:
 
                 w = xmax - xmin  # 矩形の幅
                 h = ymax - ymin  # 矩形の高さ
-                xmid = (xmax + xmin) / 2  # 矩形の中心のx座標
-                ymid = (ymax + ymin) / 2  # 矩形の中心のy座標
+                xm = (xmax + xmin) / 2  # 矩形の中心のx座標
+                ym = (ymax + ymin) / 2  # 矩形の中心のy座標
 
-                if xmid >= 0 and xmid <= WIDTH * (1 / 3):
-                    direction = "left"
-                elif xmid < WIDTH and xmid <= WIDTH * (2 / 3):
-                    direction = "center"
-                elif xmid > WIDTH * (2 / 3) and xmid < WIDTH:
-                    direction = "right"
+                width.append(int(w))
+                height.append(int(h))
+                xmid.append(int(xm))
+                ymid.append(int(ym))
+
+                if xm >= 0 and xm <= WIDTH * (1 / 3):
+                    direction.append("left")
+                elif xm < WIDTH and xm <= WIDTH * (2 / 3):
+                    direction.append("middle")
+                elif xm > WIDTH * (2 / 3) and xm < WIDTH:
+                    direction.append("right")
 
                 if h >= 450:
-                    distance = "close"
+                    distance.append("close")
                 elif h > 350 and h < 450:
-                    distance = "middle"
+                    distance.append("middle")
                 elif h <= 350:
-                    distance = "far"
+                    distance.append("far")
 
-            self.person_detect_direction_pub.publish(direction)
-            self.person_detect_distance_pub.publish(distance)
+            # self.person_detect_direction_pub.publish(direction)
+            # self.person_detect_distance_pub.publish(distance)
+        p = PersonDetect()
+        p.count = count
+        p.direction = direction
+        p.distance = distance
+        p.xmid = xmid
+        p.ymid = ymid
+        p.width = width
+        p.height = height
+        self.person_detect_result_pub.publish(p)
 
         # バウンディングボックスを描画
         result.render()
