@@ -13,6 +13,7 @@ add_message_files(
   LidarData.msg
   MoveAction.msg
   PersonDetect.msg
+  StringArray.msg
 )
 
 add_service_files(
