@@ -120,11 +120,11 @@ class ImageSystem:
                 elif xm > WIDTH * (2 / 3) and xm < WIDTH:
                     direction.append("right")
 
-                if h >= 450:
+                if h >= 380:
                     distance.append("close")
-                elif h > 350 and h < 450:
+                elif h > 360 and h < 380:
                     distance.append("middle")
-                elif h <= 350:
+                elif h <= 360:
                     distance.append("far")
 
         p = PersonDetect()
