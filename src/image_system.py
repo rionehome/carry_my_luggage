@@ -5,9 +5,9 @@ import cv2
 import matplotlib
 import rospy
 import torch
-from std_msgs.msg import Int16, String
+from std_msgs.msg import String
 
-from carry_my_luggage.msg import Detect, StringArray
+from carry_my_luggage.msg import Detect
 from carry_my_luggage.srv import HandDirection
 from hand_direction import get_direction
 
