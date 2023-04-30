@@ -7,7 +7,7 @@ import rospy
 import torch
 from std_msgs.msg import Int16, String
 
-from carry_my_luggage.msg import PersonDetect, StringArray
+from carry_my_luggage.msg import Detect, StringArray
 from carry_my_luggage.srv import HandDirection
 from hand_direction import get_direction
 
@@ -31,9 +31,7 @@ class ImageSystem:
         self.person_detect_switch_sub = rospy.Subscriber(
             "/image_system/person_detect/switch", String, self.person_detect_switch_callback
         )
-        self.person_detect_result_pub = rospy.Publisher(
-            "/image_system/person_detect/result", PersonDetect, queue_size=1
-        )
+        self.person_detect_result_pub = rospy.Publisher("/image_system/person_detect/result", Detect, queue_size=1)
 
         # paperbag detect
         self.is_paperbag_detect_on = False
@@ -127,15 +125,15 @@ class ImageSystem:
                 elif h <= 360:
                     distance.append("far")
 
-        p = PersonDetect()
-        p.count = count
-        p.direction = direction
-        p.distance = distance
-        p.xmid = xmid
-        p.ymid = ymid
-        p.width = width
-        p.height = height
-        self.person_detect_result_pub.publish(p)
+        d = Detect()
+        d.count = count
+        d.direction = direction
+        d.distance = distance
+        d.xmid = xmid
+        d.ymid = ymid
+        d.width = width
+        d.height = height
+        self.person_detect_result_pub.publish(d)
 
         # バウンディングボックスを描画
         result.render()
