@@ -12,7 +12,7 @@ add_message_files(
   ArmAction.msg
   LidarData.msg
   MoveAction.msg
-  PersonDetect.msg
+  Detect.msg
   StringArray.msg
 )
 
