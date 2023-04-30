@@ -45,17 +45,11 @@ class ImageSystem:
         self.person_detect_switch_sub = rospy.Subscriber(
             "/image_system/paperbag_detect/switch", String, self.paperbag_detect_switch_callback
         )
-        self.paperbag_detect_paperbag_count_pub = rospy.Publisher(
-            "/image_system/paperbag_detect/paperbag/count", Int16, queue_size=1
+        self.paperbag_detect_paperbag_result_pub = rospy.Publisher(
+            "/image_system/paperbag_detect/paperbag/result", Detect, queue_size=1
         )
-        self.paperbag_detect_paperbag_direction_pub = rospy.Publisher(
-            "/image_system/paperbag_detect/paperbag/direction", StringArray, queue_size=1
-        )
-        self.paperbag_detect_holding_count_pub = rospy.Publisher(
-            "/image_system/paperbag_detect/holding/count", Int16, queue_size=1
-        )
-        self.paperbag_detect_holding_direction_pub = rospy.Publisher(
-            "/image_system/paperbag_detect/holding/direction", StringArray, queue_size=1
+        self.paperbag_detect_holding_result_pub = rospy.Publisher(
+            "/image_system/paperbag_detect/holding/result", Detect, queue_size=1
         )
 
     def hand_direction_callback(self, msg):
@@ -154,24 +148,23 @@ class ImageSystem:
             self.paperbag_detect()
 
     def paperbag_detect(self):
-        # 人が写っていない前提で初期化する
-        robo_p_dis = 3  # ロボットと人との距離感覚
-        robo_p_drct = 3  # ロボットと人との方向感覚
+        # p for paperbag
+        p_count = 0
+        p_direction = []
+        p_distance = []
+        p_xmid = []
+        p_ymid = []
+        p_width = []
+        p_height = []
 
-        c = 0
-        heigh = 0  # カメラから取得した画像の高さを保持
-        width = 0  # カメラから取得した画像の幅を保持
-        img_c_x = 0  # 画像のx座標の中心位置
-        img_c_y = 0  # 画像のy座標の中心位置
-
-        paperbag_count = 0  # 紙袋の数
-        holding_count = 0  # 紙袋の数
-
-        state = "select"  # 鞄をつかむまでの状態
-        bag_rl = ""  # 左右のどちらのカバンを追いかけたか
-
-        # select 左右の鞄のいずれかを近づく
-        # get 鞄の取手を探してつかむ
+        # h for holding
+        h_count = 0
+        h_direction = []
+        h_distance = []
+        h_xmid = []
+        h_ymid = []
+        h_width = []
+        h_height = []
 
         ret, img = self.cap.read()
         result = self.paperbag_detect_model(img)
@@ -179,244 +172,78 @@ class ImageSystem:
         # 推論結果を取得
         obj = result.pandas().xyxy[0]
 
-        paperbag_direction = []
-        holding_direction = []
-
         # 紙袋が写っているかを調べる holding
         for i in range(len(obj)):
             if obj.name[i] == "paper_bag":
-                paperbag_count += 1
+                p_count += 1
 
                 xmin = obj.xmin[i]
                 ymin = obj.ymin[i]
                 xmax = obj.xmax[i]
                 ymax = obj.ymax[i]
 
+                width = xmax - xmin  # 矩形の幅
+                height = ymax - ymin  # 矩形の高さ
                 xmid = (xmin + xmax) / 2
                 ymid = (ymin + ymax) / 2
 
+                p_width.append(int(width))
+                p_height.append(int(height))
+                p_xmid.append(int(xmid))
+                p_ymid.append(int(ymid))
+
                 if xmid > 0 and xmid <= WIDTH * (1 / 3):
-                    # print("left")
-                    paperbag_direction.append("left")
+                    p_direction.append("left")
                 elif xmid > WIDTH * (1 / 3) and xmid <= WIDTH * (2 / 3):
-                    # print("middle")
-                    paperbag_direction.append("middle")
+                    p_direction.append("middle")
                 elif xmid > WIDTH * (2 / 3) and xmid < WIDTH:
-                    # print("right")
-                    paperbag_direction.append("right")
+                    p_direction.append("right")
 
             if obj.name[i] == "holding":
-                holding_count += 1
+                h_count += 1
 
                 xmin = obj.xmin[i]
                 ymin = obj.ymin[i]
                 xmax = obj.xmax[i]
                 ymax = obj.ymax[i]
 
+                width = xmax - xmin  # 矩形の幅
+                height = ymax - ymin  # 矩形の高さ
                 xmid = (xmin + xmax) / 2
                 ymid = (ymin + ymax) / 2
 
+                h_width.append(int(width))
+                h_height.append(int(height))
+                h_xmid.append(int(xmid))
+                h_ymid.append(int(ymid))
+
                 if xmid > 0 and xmid <= WIDTH * (1 / 3):
-                    holding_direction.append("left")
+                    h_direction.append("left")
                 elif xmid > WIDTH * (1 / 3) and xmid <= WIDTH * (2 / 3):
-                    holding_direction.append("middle")
+                    h_direction.append("middle")
                 elif xmid > WIDTH * (2 / 3) and xmid < WIDTH:
-                    holding_direction.append("right")
+                    h_direction.append("right")
 
-        self.paperbag_detect_paperbag_count_pub.publish(paperbag_count)
-        self.paperbag_detect_holding_count_pub.publish(holding_count)
+        d = Detect()
+        d.count = p_count
+        d.direction = p_direction
+        d.distance = p_distance
+        d.xmid = p_xmid
+        d.ymid = p_ymid
+        d.width = p_width
+        d.height = p_height
+        self.paperbag_detect_paperbag_result_pub.publish(d)
 
-        s = StringArray()
-        s.strings = paperbag_direction
-        self.paperbag_detect_paperbag_direction_pub.publish(s)
+        d = Detect()
+        d.count = h_count
+        d.direction = h_direction
+        d.distance = h_distance
+        d.xmid = h_xmid
+        d.ymid = h_ymid
+        d.width = h_width
+        d.height = h_height
+        self.paperbag_detect_holding_result_pub.publish(d)
 
-        s = StringArray()
-        s.strings = holding_direction
-        self.paperbag_detect_holding_direction_pub.publish(s)
-
-        result.render()
-        cv2.imshow("result", result.ims[0])
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            return
-        return
-
-        # 紙袋が写っていないとき何もしない
-
-        # メガネが写っているとき
-        if pprbg_count == 1:
-
-            # glss_w_l = [] #検出されたメガネの大きさを保持
-            # glss_idx_l = [] #検出されたメガネの添字を保持
-            # 紙袋は左右に2つあり最も近いものを追いかける必要性もない
-
-            pprbg_cx_list = []  # 左右のどちらかを追いかけるために使用
-
-            """
-            紙袋の左右の判断をする場合のみ select状態を使用
-            自動的にロボットの視界から紙袋を自動的に外す場合など場合、get状態を使用
-            """
-
-            # 左右のどちらかに近づくとき
-            # 鞄が2個とも視界に入っていたら
-            if state == "select":
-
-                # 紙袋の数を数える
-                for i in range(len(obj)):
-                    if obj.name[i] == "paper_bag":
-                        pprbg_count += 1
-
-                # 左右に紙袋が2つ写っている状況
-                if pprbg_count == 2:
-                    # バウンディングボックスの情報を取得
-                    for i in range(len(obj)):
-
-                        # 検出された物体が紙袋のときに
-                        if obj.name[i] == "paper_bag":
-
-                            # 写っているときだけ計算することで無駄な計算を削減する。
-                            xmin = obj.xmin[i]
-                            ymin = obj.ymin[i]
-                            xmax = obj.xmax[i]
-                            ymax = obj.ymax[i]
-
-                            c_x = (xmin + xmax) / 2  # カバンがカメラから見て真ん中に来ているかを見る
-
-                            pprbg_cx_list.append(c_x)  # 鞄の中心座標を追加する
-
-                    bag_rl = "right"
-
-                    # 左右のどちらかに決まるまで待つ
-                    while bag_rl != "right" and bag_rl != "left":
-                        bag_rl = ""  # 左右のどちらか決まっていない
-
-                    # ロボットから見て左右のどちらにあるか
-                    if bag_rl == "right":
-                        track_pprbg_ID = pprbg_cx_list.index(max(pprbg_cx_list))
-                    elif bag_rl == "left":
-                        track_pprbg_ID = pprbg_cx_list.index(min(pprbg_cx_list))
-
-                    print(str(i + 1) + "番目、" + "、中心x:" + str(c_x))
-
-                # 紙袋が1つだけになったとき(視界から紙袋が消えた)
-                elif pprbg_count == 1:
-                    state = "get"  # とってを掴みにいく
-
-            # つかむ状態のとき視界には鞄は1つだけでないとおかしい
-            if state == "get":
-
-                pprbg_count = 0
-                hl_count = 0
-
-                # 紙袋の数を数える
-                for i in range(len(obj)):
-                    if obj.name[i] == "paper_bag":
-                        pprbg_count += 1
-
-                # 紙袋の取手の数を数える
-                for i in range(len(obj)):
-                    if obj.name[i] == "holding":
-                        hl_count += 1
-
-                # 紙袋と取手が1ずつ検出されたとき
-                if pprbg_count == 1 and hl_count == 1:
-
-                    pprbg_w = 0  # 紙袋の幅を取得
-                    pprbg_cx = 0  # 紙袋の幅を取得
-
-                    # 紙袋と取手を含むバウンディングボックスの情報を取得
-                    for i in range(len(obj)):
-
-                        # 紙袋を引き続き追いかける
-                        if obj.name[i] == "paper_bag":
-
-                            # 写っているときだけ計算することで無駄な計算を削減する。
-                            xmin = obj.xmin[i]
-                            ymin = obj.ymin[i]
-                            xmax = obj.xmax[i]
-                            ymax = obj.ymax[i]
-
-                            pprbg_w = xmax - xmin
-                            pprbg_cx = (xmin + xmax) / 2
-
-                            delta_pprbg_cx = int(pprbg_cx - img_cx)
-                            # print("中心からのずれ")
-                            # print("delta_pprbg_cx =" + str(delta_pprbg_cx))
-
-                            """
-                            微調整をする場合、
-                            if pprbg_w > width/2 - 50 and pprbg_w < width/2 + 50:を残す
-
-                            しない場合
-                            #紙袋から離れているときに、紙袋に接近する
-                            else:
-                                print("紙袋がほどよい距離と方向にあるように調整する。")
-                            """
-                            # 紙袋に十分近づいているときに、
-                            if pprbg_w > width / 2 - 50 and pprbg_w < width / 2 + 50:
-                                print("紙袋が視界の中央に来るように調整する。")
-
-                                # 鞄が視界の中央に来るように位置調整を行う。
-                                if delta_pprbg_cx < -40:
-                                    robo_p_drct = 4  # 微調整用_左
-                                    print("左にある")
-
-                                elif delta_pprbg_cx > 40:
-                                    robo_p_drct = 6  # 微調整用_右
-                                    print("右にある")
-
-                                else:
-                                    robo_p_drct = 5  # 微調整用_中央
-                                    print("中央にある")
-
-                            # 紙袋から離れているときに、紙袋に接近する
-                            else:
-                                print("紙袋がほどよい距離と方向にあるように調整する。")
-
-                                if pprbg_w < width / 2 + 100:
-                                    # print(str(i) + "番目の人が遠い")
-                                    robo_p_dis = 0  # ロボットは人が中央に来るまで前に進む
-
-                                elif pprbg_w >= width / 2 - 100 and pprbg_w <= width / 2 + 100:
-                                    # print(str(i) + "番目の人が中央の距離")
-                                    robo_p_dis = 1  # ロボットはそのまま
-
-                                elif pprbg_w > width / 2 - 100:
-                                    # print(str(i) + "番目の人が近い")
-                                    robo_p_dis = 2  # ロボットは人が中央に来るまで後ろに下がる
-
-                                if pprbg_cx < width / 3:
-                                    # print(str(i) + "番目の人が左にいる")
-                                    robo_p_drct = 0  # 大規模調整_左
-
-                                elif pprbg_cx > width / 3 and pprbg_cx < width * 2 / 3:
-                                    # print(str(i) + "番目の人が中央の方向")
-                                    robo_p_drct = 1  # _大規模調整_中央
-
-                                elif pprbg_cx > width * 2 / 3:
-                                    # print(str(i) + "番目の人が右にいる")
-                                    robo_p_drct = 2  # 大規模調整_右
-
-                                print("robo_p_dis=" + str(robo_p_dis))
-                                print("robo_p_drct=" + str(robo_p_drct))
-
-            print(state)
-
-        pprbg_count = 0  # 紙袋の数を数える変数を初期化
-
-        """
-        ここで、距離と方向をPublishしてほしい。
-        変数の値と意味
-        [robo_p_dis]
-        0:遠い、1:中央、2:近い
-        3:紙袋が存在しない
-        [robo_p_drct]
-        0:大きく遠い、1:大まかに中央、2:大きく近い
-        3:紙袋が存在しない
-        大まかに中央を更に細かく3つに分類
-        4:小さく遠い、5:狭く中央、6:小さく近い
-        """
-
-        # バウンディングボックスを描画
         result.render()
         cv2.imshow("result", result.ims[0])
         if cv2.waitKey(1) & 0xFF == ord("q"):
