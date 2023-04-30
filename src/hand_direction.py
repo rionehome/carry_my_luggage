@@ -32,50 +32,50 @@ def get_direction(n):
                 right_wrist = right_hand.landmark[0]
                 if abs(left_wrist.y - right_wrist.y) < 0.1:
                     if left_wrist.x < right_wrist.x:
-                        if direction != "Right":
+                        if direction != "right":
                             right_count = 1
                             left_count = 0
-                            direction = "Right"
+                            direction = "right"
                         else:
                             right_count += 1
                             if right_count >= n:
                                 cap.release()
                                 cv2.destroyAllWindows()
-                                return "Right"
+                                return "right"
                     else:
-                        if direction != "Left":
+                        if direction != "left":
                             left_count = 1
                             right_count = 0
-                            direction = "Left"
+                            direction = "left"
                         else:
                             left_count += 1
                             if left_count >= n:
                                 cap.release()
                                 cv2.destroyAllWindows()
-                                return "Left"
+                                return "left"
                 else:
                     if left_wrist.y < right_wrist.y:
-                        if direction != "Right":
+                        if direction != "right":
                             right_count = 1
                             left_count = 0
-                            direction = "Right"
+                            direction = "right"
                         else:
                             right_count += 1
                             if right_count >= n:
                                 cap.release()
                                 cv2.destroyAllWindows()
-                                return "Right"
+                                return "right"
                     else:
-                        if direction != "Left":
+                        if direction != "left":
                             left_count = 1
                             right_count = 0
-                            direction = "Left"
+                            direction = "left"
                         else:
                             left_count += 1
                             if left_count >= n:
                                 cap.release()
                                 cv2.destroyAllWindows()
-                                return "Left"
+                                return "left"
             else:
                 for hand_landmarks in results.multi_hand_landmarks:
                     wrist = hand_landmarks.landmark[0]
@@ -83,27 +83,27 @@ def get_direction(n):
                     index_tip = hand_landmarks.landmark[8]
                     mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                     if index_tip.x < wrist.x:
-                        if direction != "Left":
+                        if direction != "left":
                             left_count = 1
                             right_count = 0
-                            direction = "Left"
+                            direction = "left"
                         else:
                             left_count += 1
                             if left_count >= n:
                                 cap.release()
                                 cv2.destroyAllWindows()
-                                return "Left"
+                                return "left"
                     else:
-                        if direction != "Right":
+                        if direction != "right":
                             right_count = 1
                             left_count = 0
-                            direction = "Right"
+                            direction = "right"
                         else:
                             right_count += 1
                             if right_count >= n:
                                 cap.release()
                                 cv2.destroyAllWindows()
-                                return "Right"
+                                return "right"
 
         cv2.imshow("MediaPipe Hands", image)
         if cv2.waitKey(5) & 0xFF == 27:
