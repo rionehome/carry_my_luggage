@@ -71,13 +71,13 @@ class ImageSystem:
     def person_detect(self):
         ret, img = self.cap.read()  # 画像の大きさを取得するために1度だけ最初によびだす。
 
-        count = 0  # 人が写っているかどうかを判定するための変数
-        direction = []
-        distance = []
-        xmid = []
-        ymid = []
-        width = []
-        height = []
+        p_count = 0  # 人が写っているかどうかを判定するための変数
+        p_direction = []
+        p_distance = []
+        p_xmid = []
+        p_ymid = []
+        p_width = []
+        p_height = []
 
         ret, img = self.cap.read()
         result = self.person_detect_model(img)
@@ -95,38 +95,38 @@ class ImageSystem:
                 xmax = obj.xmax[i]
                 ymax = obj.ymax[i]
 
-                w = xmax - xmin  # 矩形の幅
-                h = ymax - ymin  # 矩形の高さ
-                xm = (xmax + xmin) / 2  # 矩形の中心のx座標
-                ym = (ymax + ymin) / 2  # 矩形の中心のy座標
+                width = xmax - xmin  # 矩形の幅
+                height = ymax - ymin  # 矩形の高さ
+                xmid = (xmax + xmin) / 2  # 矩形の中心のx座標
+                ymid = (ymax + ymin) / 2  # 矩形の中心のy座標
 
-                width.append(int(w))
-                height.append(int(h))
-                xmid.append(int(xm))
-                ymid.append(int(ym))
+                p_width.append(int(width))
+                p_height.append(int(height))
+                p_xmid.append(int(xmid))
+                p_ymid.append(int(ymid))
 
-                if xm >= 0 and xm <= WIDTH * (1 / 3):
-                    direction.append("left")
-                elif xm < WIDTH and xm <= WIDTH * (2 / 3):
-                    direction.append("middle")
-                elif xm > WIDTH * (2 / 3) and xm < WIDTH:
-                    direction.append("right")
+                if xmid >= 0 and xmid <= WIDTH * (1 / 3):
+                    p_direction.append("left")
+                elif xmid < WIDTH and xmid <= WIDTH * (2 / 3):
+                    p_direction.append("middle")
+                elif xmid > WIDTH * (2 / 3) and xmid < WIDTH:
+                    p_direction.append("right")
 
-                if h >= 380:
-                    distance.append("close")
-                elif h > 360 and h < 380:
-                    distance.append("middle")
-                elif h <= 360:
-                    distance.append("far")
+                if height >= 380:
+                    p_distance.append("close")
+                elif height > 360 and height < 380:
+                    p_distance.append("middle")
+                elif height <= 360:
+                    p_distance.append("far")
 
         d = Detect()
-        d.count = count
-        d.direction = direction
-        d.distance = distance
-        d.xmid = xmid
-        d.ymid = ymid
-        d.width = width
-        d.height = height
+        d.count = p_count
+        d.direction = p_direction
+        d.distance = p_distance
+        d.xmid = p_xmid
+        d.ymid = p_ymid
+        d.width = p_width
+        d.height = p_height
         self.person_detect_result_pub.publish(d)
 
         # バウンディングボックスを描画
