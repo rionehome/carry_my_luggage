@@ -53,14 +53,19 @@ class ImageSystem:
         )
 
     def hand_direction_callback(self, msg):
-        rospy.loginfo("image_system: detecting hand direction")
+        rospy.loginfo("image_system: Detecting hand direction")
+
         return get_direction(msg.n)
 
     def person_detect_switch_callback(self, msg):
         if msg.data == "on" and self.is_person_detect_on == False:
+            rospy.loginfo("image_system: Turning on person_detect")
+
             self.is_person_detect_on = True
             self.cap = cv2.VideoCapture(0)
         elif msg.data == "off" and self.is_person_detect_on == True:
+            rospy.loginfo("image_system: Turning off person_detect")
+
             self.is_person_detect_on = False
             self.cap.release()
             cv2.destroyAllWindows()
@@ -137,9 +142,13 @@ class ImageSystem:
 
     def paperbag_detect_switch_callback(self, msg):
         if msg.data == "on" and self.is_paperbag_detect_on == False:
+            rospy.loginfo("image_system: Turning on paperbag_detect")
+
             self.is_paperbag_detect_on = True
             self.cap = cv2.VideoCapture(0)
         elif msg.data == "off" and self.is_paperbag_detect_on == True:
+            rospy.loginfo("image_system: Turning off paperbag_detect")
+
             self.is_paperbag_detect_on = False
             self.cap.release()
             cv2.destroyAllWindows()
