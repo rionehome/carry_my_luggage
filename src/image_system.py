@@ -93,7 +93,7 @@ class ImageSystem:
         # 人が写っているかを調べる
         for i in range(len(obj)):
             if obj.name[i] == "person":
-                count += 1
+                p_count += 1
 
                 xmin = obj.xmin[i]
                 ymin = obj.ymin[i]
