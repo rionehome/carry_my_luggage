@@ -33,7 +33,7 @@ class MainSystem:
             "/image_system/person_detect/switch", String, queue_size=1
         )
         rospy.Subscriber("/image_system/person_detect/result", Detect, self.image_person_detect_result_callback)
-        self.person_detect_count = 0
+        self.person_count = 0
         self.person_direction = []
         self.person_distance = []
         self.person_xmid = []
@@ -199,31 +199,31 @@ class MainSystem:
         self.person_detect_direction = msg.data
 
     def image_person_detect_result_callback(self, msg):
-        self.person_detect_count = msg.count
-        self.person_detect_direction = msg.direction
-        self.person_detect_distance = msg.distance
-        self.person_detect_xmid = msg.xmid
-        self.person_detect_ymid = msg.ymid
-        self.person_detect_width = msg.width
-        self.person_detect_height = msg.height
+        self.person_count = msg.count
+        self.person_direction = msg.direction
+        self.person_distance = msg.distance
+        self.person_xmid = msg.xmid
+        self.person_ymid = msg.ymid
+        self.person_width = msg.width
+        self.person_height = msg.height
 
     def image_paperbag_detect_paperbag_result_callback(self, msg):
         self.paperbag_count = msg.count
         self.paperbag_direction = msg.direction
         self.paperbag_distance = msg.distance
-        self.paperbag_detect_xmid = msg.xmid
-        self.paperbag_detect_ymid = msg.ymid
-        self.paperbag_detect_width = msg.width
-        self.paperbag_detect_height = msg.height
+        self.paperbag_xmid = msg.xmid
+        self.paperbag_ymid = msg.ymid
+        self.paperbag_width = msg.width
+        self.paperbag_height = msg.height
 
     def image_paperbag_detect_holding_result_callback(self, msg):
         self.holding_count = msg.count
         self.holding_direction = msg.direction
         self.holding_distance = msg.distance
-        self.holding_detect_xmid = msg.xmid
-        self.holding_detect_ymid = msg.ymid
-        self.holding_detect_width = msg.width
-        self.holding_detect_height = msg.height
+        self.holding_xmid = msg.xmid
+        self.holding_ymid = msg.ymid
+        self.holding_width = msg.width
+        self.holding_height = msg.height
 
 
 if __name__ == "__main__":
