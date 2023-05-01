@@ -145,7 +145,7 @@ class ImageSystem:
             rospy.loginfo("image_system: Turning on paperbag_detect")
 
             self.is_paperbag_detect_on = True
-            self.cap = cv2.VideoCapture(0)
+            self.cap = cv2.VideoCapture(2)
         elif msg.data == "off" and self.is_paperbag_detect_on == True:
             rospy.loginfo("image_system: Turning off paperbag_detect")
 
