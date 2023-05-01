@@ -34,12 +34,12 @@ class MainSystem:
         )
         rospy.Subscriber("/image_system/person_detect/result", Detect, self.image_person_detect_result_callback)
         self.person_detect_count = 0
-        self.person_detect_direction = []
-        self.person_detect_distance = []
-        self.person_detect_xmid = []
-        self.person_detect_ymid = []
-        self.person_detect_width = []
-        self.person_detect_height = []
+        self.person_direction = []
+        self.person_distance = []
+        self.person_xmid = []
+        self.person_ymid = []
+        self.person_width = []
+        self.person_height = []
 
         # paperbag detect
         # paperbag
@@ -52,10 +52,10 @@ class MainSystem:
         self.paperbag_count = 0
         self.paperbag_direction = []
         self.paperbag_distance = []
-        self.paperbag_detect_xmid = []
-        self.paperbag_detect_ymid = []
-        self.paperbag_detect_width = []
-        self.paperbag_detect_height = []
+        self.paperbag_xmid = []
+        self.paperbag_ymid = []
+        self.paperbag_width = []
+        self.paperbag_height = []
 
         # holding
         rospy.Subscriber(
@@ -64,10 +64,10 @@ class MainSystem:
         self.holding_count = 0
         self.holding_direction = []
         self.holding_distance = []
-        self.holding_detect_xmid = []
-        self.holding_detect_ymid = []
-        self.holding_detect_width = []
-        self.holding_detect_height = []
+        self.holding_xmid = []
+        self.holding_ymid = []
+        self.holding_width = []
+        self.holding_height = []
 
         # audio
         self.audio_tts_client = rospy.ServiceProxy("/audio_system/text_to_speech", TextToSpeech)
