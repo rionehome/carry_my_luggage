@@ -100,6 +100,7 @@ class MainSystem:
             self.audio_tts_client("I will grab right paperbag")
 
         did_turn = False
+        paperbag_timer = 0
 
         while True:
             t = Twist()
@@ -153,6 +154,12 @@ class MainSystem:
                 else:
                     t.angular.z = 0
 
+                if max_width > 450 and d == "middle":
+                    if paperbag_timer % 180:
+                        break
+
+                    paperbag_timer += 1
+
                 self.control_vel_pub.publish(t)
 
                 # rospy.loginfo(max_width)
@@ -169,6 +176,8 @@ class MainSystem:
         self.control_arm(37, 7, 30, 2)
         # もちあげてからの〜
         self.control_arm(30, 20, 30, 2)
+
+        persondetect_timer = 0
 
         while True:
             t = Twist()
@@ -225,6 +234,17 @@ class MainSystem:
                     t.linear.x = 0.1
                 elif height < 350:
                     t.linear.x = 0.15
+
+                if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20 and height >= 400:
+                    if persondetect_timer % 180 == 0:
+                        self.audio_tts_client("Did you arrive at parking?")
+                        i = self.audio_stt_client()
+                        if i.res == "yes" or i.res == "Yes":
+                            break
+
+                        persondetect_timer = 0
+
+                    persondetect_timer += 1
             else:
                 t.linear.x = 0
                 t.angular.z = 0
@@ -232,23 +252,6 @@ class MainSystem:
             self.control_vel_pub.publish(t)
 
             rospy.Rate(10).sleep()
-            # i = self.person_detect_distance
-            # j = self.person_detect_direction
-
-            # t = Twist()
-
-            # if i != "close":
-            #     t.linear.x = 0.1
-            # else:
-            #     t.linear.x = 0
-
-            # if j == "right":
-            #     t.angular.z = - 0.6
-            # elif j == "left":
-            #     t.angular.z = 0.6
-
-            # self.control_vel_pub.publish(t)
-            # rospy.Rate(10).sleep
 
         rospy.loginfo("carry_my_luggage finish!")
 
