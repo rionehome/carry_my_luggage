@@ -8,7 +8,7 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import String
 
 from carry_my_luggage.msg import Detect
-from carry_my_luggage.srv import HandDirection, IsMeaning, SpeechToText, TextToSpeech
+from carry_my_luggage.srv import HandDirection, IsMeaning, MoveArm, SpeechToText, TextToSpeech
 
 WIDTH = 640
 HEIGHT = 480
@@ -20,6 +20,7 @@ class MainSystem:
 
         # control
         self.control_vel_pub = rospy.Publisher("/control_system/cmd_vel", Twist, queue_size=1)
+        self.control_arm = rospy.ServiceProxy("/move_arm", MoveArm)
 
         # image
         self.person_detect_distance = "far"
@@ -80,22 +81,23 @@ class MainSystem:
         rospy.loginfo("Please wait...")
 
         time.sleep(3)
-        self.audio_tts_client("ちょっとまっててね")
+        self.audio_tts_client("Please wait for seconds")
         time.sleep(3)
 
-        self.audio_tts_client("どちらの紙袋を取りたいか指で指してください")
+        rospy.wait_for_service("/move_arm")
+
+        self.audio_tts_client("Please point which paperbag you want to pick")
 
         i = self.image_hand_detect_client(60)
         direction = i.direction
 
-        # 返ってくるiの値は指を指した人から見た方向
         # ロボットから見た方向を発話する
         if direction == "left":
-            self.audio_tts_client("左ですね")
-            self.audio_tts_client("左の紙袋を掴みます")
+            self.audio_tts_client("You chose left")
+            self.audio_tts_client("I will grab left paperbag")
         elif direction == "right":
-            self.audio_tts_client("右ですね")
-            self.audio_tts_client("右の紙袋を掴みます")
+            self.audio_tts_client("You chose right")
+            self.audio_tts_client("I will grab right paperbag")
 
         did_turn = False
 
@@ -113,10 +115,8 @@ class MainSystem:
 
             if h_count >= 2 and direction in h_direction and not did_turn:
                 if direction == "right":
-                    print("turning right")
                     t.angular.z = -0.5
                 elif direction == "left":
-                    print("turning left")
                     t.angular.z = 0.5
                 else:
                     t.angular.z = 0
@@ -155,7 +155,20 @@ class MainSystem:
 
                 self.control_vel_pub.publish(t)
 
-                rospy.loginfo(max_width)
+                # rospy.loginfo(max_width)
+
+        # 初期位置
+        self.control_arm(0, 0, 0, 0)
+        # じゅんびして〜
+        self.control_arm(23, 5, 10, 4)
+        # のばしてぇーの〜
+        self.control_arm(35, 7, 10, 4)
+        # とじるっ！
+        self.control_arm(35, 7, 10, 2)
+        # ひっかける！
+        self.control_arm(37, 7, 30, 2)
+        # もちあげてからの〜
+        self.control_arm(30, 20, 30, 2)
 
         while True:
             t = Twist()
@@ -236,17 +249,6 @@ class MainSystem:
 
             # self.control_vel_pub.publish(t)
             # rospy.Rate(10).sleep
-
-        self.audio_tts_client("どちらに紙袋があるか指で示してください")
-
-        i = self.image_hand_detect_client(90)
-        i = i.direction
-
-        # OPから見た方向
-        if i == "Right":
-            self.audio_tts_client("右ですね")
-        elif i == "Left":
-            self.audio_tts_client("左ですね")
 
         rospy.loginfo("carry_my_luggage finish!")
 
