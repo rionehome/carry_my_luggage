@@ -114,11 +114,11 @@ class MainSystem:
             h_direction = self.holding_direction
             h_width = self.holding_width
 
-            if h_count >= 2 and direction in h_direction and not did_turn:
+            if h_count >= 2 and direction in h_direction and did_turn == False:
                 if direction == "right":
-                    t.angular.z = -0.5
+                    t.angular.z = -0.6
                 elif direction == "left":
-                    t.angular.z = 0.5
+                    t.angular.z = 0.6
                 else:
                     t.angular.z = 0
                     did_turn = True
@@ -134,7 +134,7 @@ class MainSystem:
                 if max_width > 450:
                     t.linear.x = 0
                 else:
-                    t.linear.x = 0.09
+                    t.linear.x = 0.12
 
                 self.control_vel_pub.publish(t)
 
@@ -145,17 +145,18 @@ class MainSystem:
                 if max_width > 450:
                     t.linear.x = 0
                 else:
-                    t.linear.x = 0.09
+                    t.linear.x = 0.12
 
                 if d == "right":
-                    t.angular.z = 0.7
-                elif d == "left":
                     t.angular.z = -0.7
+                elif d == "left":
+                    t.angular.z = 0.7
                 else:
                     t.angular.z = 0
 
                 if max_width > 450 and d == "middle":
                     if paperbag_timer % 180:
+                        self.image_paperbag_detect_switch_pub.publish("off")
                         break
 
                     paperbag_timer += 1
