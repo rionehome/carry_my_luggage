@@ -30,6 +30,7 @@ class AudioSystem:
             msg.return_extract_person_name,
             msg.remove_space,
             msg.voskLogLevel,
+            lang="en-us",
         )
 
     # TODO
