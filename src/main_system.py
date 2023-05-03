@@ -114,56 +114,97 @@ class MainSystem:
             h_direction = self.holding_direction
             h_width = self.holding_width
 
-            if h_count >= 2 and direction in h_direction and did_turn == False:
+            max_width = 0
+            max_direction = ""
+
+            if direction in p_direction:
                 if direction == "right":
                     t.angular.z = -0.6
                 elif direction == "left":
                     t.angular.z = 0.6
                 else:
                     t.angular.z = 0
-                    did_turn = True
-
-                self.control_vel_pub.publish(t)
-            elif p_count >= 2:
-                max_width = 0
+            else:
                 for i in range(p_count):
                     if max_width < p_width[i]:
                         max_width = p_width[i]
-                        direction = p_direction[i]
+                        max_direction = p_direction[i]
 
-                if max_width > 450:
-                    t.linear.x = 0
-                else:
-                    t.linear.x = 0.12
-
-                self.control_vel_pub.publish(t)
-
-            elif p_count == 1:
-                max_width = p_width[0]
-                d = p_direction[0]
-
-                if max_width > 450:
-                    t.linear.x = 0
-                else:
-                    t.linear.x = 0.12
-
-                if d == "right":
-                    t.angular.z = -0.7
-                elif d == "left":
-                    t.angular.z = 0.7
+                if max_direction == "right":
+                    t.angular.z = -0.6
+                elif max_direction == "left":
+                    t.angular.z = 0.6
                 else:
                     t.angular.z = 0
 
-                if max_width > 450 and d == "middle":
-                    if paperbag_timer % 180:
-                        self.image_paperbag_detect_switch_pub.publish("off")
+                if max_width < 450:
+                    t.linear.x = 0.06
+                else:
+                    t.linear.x = 0
+
+                    if paperbag_timer > 0 and paperbag_timer % 180 == 0:
                         break
 
                     paperbag_timer += 1
 
-                self.control_vel_pub.publish(t)
+            self.control_vel_pub.publish(t)
 
-                # rospy.loginfo(max_width)
+        now = time.time()
+
+        while time.time() - now < 3:
+            t.linear.x = 0.03
+            self.control_vel_pub.publish(t)
+
+            # if direction in p_direction and did_turn == False:
+            #     if direction == "right":
+            #         t.angular.z = -0.6
+            #     elif direction == "left":
+            #         t.angular.z = 0.6
+            #     else:
+            #         # t.angular.z = 0
+            #         did_turn = True
+
+            #     self.control_vel_pub.publish(t)
+            # elif p_count >= 2:
+            #     max_width = 0
+            #     for i in range(p_count):
+            #         if max_width < p_width[i]:
+            #             max_width = p_width[i]
+            #             direction = p_direction[i]
+
+            #     if max_width > 450:
+            #         t.linear.x = 0
+            #     else:
+            #         t.linear.x = 0.12
+
+            #     self.control_vel_pub.publish(t)
+
+            # elif p_count == 1:
+            #     max_width = p_width[0]
+            #     d = p_direction[0]
+
+            #     if max_width > 450:
+            #         t.linear.x = 0
+            #     else:
+            #         t.linear.x = 0.12
+
+            #     if d == "right":
+            #         t.angular.z = -0.7
+            #     elif d == "left":
+            #         t.angular.z = 0.7
+            #     else:
+            #         t.angular.z = 0
+
+            #     if max_width > 450 and d == "middle":
+            #         if paperbag_timer % 180:
+            #             self.image_paperbag_detect_switch_pub.publish("off")
+            #             break
+
+            #         paperbag_timer += 1
+
+            #     self.control_vel_pub.publish(t)
+
+            #     # rospy.loginfo(max_width)
 
         # 初期位置
         self.control_arm(0, 0, 0, 0)
@@ -240,7 +281,7 @@ class MainSystem:
                     t.linear.x = 0.15
 
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20 and height >= 400:
-                    if persondetect_timer % 180 == 0:
+                    if persondetect_timer > 0 and persondetect_timer % 180 == 0:
                         self.audio_tts_client("Did you arrive at parking?")
                         i = self.audio_stt_client()
                         if i.res == "yes" or i.res == "Yes":
