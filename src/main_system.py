@@ -137,7 +137,7 @@ class MainSystem:
                 else:
                     t.angular.z = 0
 
-                if max_width < 450:
+                if max_width < 460:
                     t.linear.x = 0.06
                 else:
                     t.linear.x = 0
@@ -151,60 +151,63 @@ class MainSystem:
 
         now = time.time()
 
-        while time.time() - now < 3:
+        while time.time() - now < 5:
             t.linear.x = 0.03
             self.control_vel_pub.publish(t)
 
-            # if direction in p_direction and did_turn == False:
-            #     if direction == "right":
-            #         t.angular.z = -0.6
-            #     elif direction == "left":
-            #         t.angular.z = 0.6
-            #     else:
-            #         # t.angular.z = 0
-            #         did_turn = True
+        # wait to completly stop
+        time.sleep(2)
 
-            #     self.control_vel_pub.publish(t)
-            # elif p_count >= 2:
-            #     max_width = 0
-            #     for i in range(p_count):
-            #         if max_width < p_width[i]:
-            #             max_width = p_width[i]
-            #             direction = p_direction[i]
+        # if direction in p_direction and did_turn == False:
+        #     if direction == "right":
+        #         t.angular.z = -0.6
+        #     elif direction == "left":
+        #         t.angular.z = 0.6
+        #     else:
+        #         # t.angular.z = 0
+        #         did_turn = True
 
-            #     if max_width > 450:
-            #         t.linear.x = 0
-            #     else:
-            #         t.linear.x = 0.12
+        #     self.control_vel_pub.publish(t)
+        # elif p_count >= 2:
+        #     max_width = 0
+        #     for i in range(p_count):
+        #         if max_width < p_width[i]:
+        #             max_width = p_width[i]
+        #             direction = p_direction[i]
 
-            #     self.control_vel_pub.publish(t)
+        #     if max_width > 450:
+        #         t.linear.x = 0
+        #     else:
+        #         t.linear.x = 0.12
 
-            # elif p_count == 1:
-            #     max_width = p_width[0]
-            #     d = p_direction[0]
+        #     self.control_vel_pub.publish(t)
 
-            #     if max_width > 450:
-            #         t.linear.x = 0
-            #     else:
-            #         t.linear.x = 0.12
+        # elif p_count == 1:
+        #     max_width = p_width[0]
+        #     d = p_direction[0]
 
-            #     if d == "right":
-            #         t.angular.z = -0.7
-            #     elif d == "left":
-            #         t.angular.z = 0.7
-            #     else:
-            #         t.angular.z = 0
+        #     if max_width > 450:
+        #         t.linear.x = 0
+        #     else:
+        #         t.linear.x = 0.12
 
-            #     if max_width > 450 and d == "middle":
-            #         if paperbag_timer % 180:
-            #             self.image_paperbag_detect_switch_pub.publish("off")
-            #             break
+        #     if d == "right":
+        #         t.angular.z = -0.7
+        #     elif d == "left":
+        #         t.angular.z = 0.7
+        #     else:
+        #         t.angular.z = 0
 
-            #         paperbag_timer += 1
+        #     if max_width > 450 and d == "middle":
+        #         if paperbag_timer % 180:
+        #             self.image_paperbag_detect_switch_pub.publish("off")
+        #             break
 
-            #     self.control_vel_pub.publish(t)
+        #         paperbag_timer += 1
 
-            #     # rospy.loginfo(max_width)
+        #     self.control_vel_pub.publish(t)
+
+        #     # rospy.loginfo(max_width)
 
         # 初期位置
         self.control_arm(0, 0, 0, 0)
@@ -236,15 +239,6 @@ class MainSystem:
                 height = self.person_height[0]
                 xmid = self.person_xmid[0]
 
-                # if direction == "right":
-                #     rospy.loginfo("right")
-                #     t.angular.z = - 0.7
-                # elif direction == "middle":
-                #     rospy.loginfo("middle")
-                # elif direction == "left":
-                #     rospy.loginfo("left")
-                #     t.angular.z = 0.7
-
                 if xmid > (WIDTH / 2) - 15 and xmid < (WIDTH / 2) + 15:
                     pass
                 elif xmid < WIDTH / 2:
@@ -269,9 +263,9 @@ class MainSystem:
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20:
                     pass
                 elif xmid < WIDTH / 2:
-                    t.angular.z = 0.7
+                    t.angular.z = 0.5
                 elif xmid > WIDTH / 2:
-                    t.angular.z = -0.7
+                    t.angular.z = -0.5
 
                 if height >= 400:
                     t.linear.x = 0
