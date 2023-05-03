@@ -142,6 +142,10 @@ class ImageSystem:
 
     def paperbag_detect_switch_callback(self, msg):
         if msg.data == "on" and self.is_paperbag_detect_on == False:
+            if self.is_person_detect_on:
+                self.cap.release()
+                cv2.destroyAllWindows()
+
             rospy.loginfo("image_system: Turning on paperbag_detect")
 
             self.is_paperbag_detect_on = True
