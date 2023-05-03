@@ -178,6 +178,9 @@ class MainSystem:
         # もちあげてからの〜
         self.control_arm(30, 20, 30, 2)
 
+        # wait for hooking paperbag manually
+        time.sleep(10)
+
         persondetect_timer = 0
 
         while True:
