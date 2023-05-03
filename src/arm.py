@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import rospy
-from open_manipulator_msgs.srv import SetJointPosition, SetJointPositionRequest
-from carry_my_luggage.msg import ArmAction
 import sys
 from math import pi
+
+import rospy
+from open_manipulator_msgs.srv import SetJointPosition, SetJointPositionRequest
+
+from carry_my_luggage.msg import ArmAction
 
 # names of group and joint
 arm_planning_group = "arm"

@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import rospy
-from carry_my_luggage.msg import ArmAction
-from carry_my_luggage.srv import MoveArm
-import numpy as np
 import math
 import time
+
+import numpy as np
+import rospy
+
+from carry_my_luggage.msg import ArmAction
+from carry_my_luggage.srv import MoveArm
 
 
 class Take_a_Bag:
@@ -62,15 +64,11 @@ class Take_a_Bag:
             c = math.sqrt((tPx * tPx) + (tPy * tPy))
             # への字の解
             th2 = -math.acos((c * c - L1 * L1 - L2 * L2) / (2 * L1 * L2))
-            th1 = math.atan2(tPy, tPx) + math.acos(
-                (c * c + L1 * L1 - L2 * L2) / (2 * L1 * c)
-            )
+            th1 = math.atan2(tPy, tPx) + math.acos((c * c + L1 * L1 - L2 * L2) / (2 * L1 * c))
             if abs(math.pi / 2 - th1) > math.pi / 2:
                 # 逆への字の解
                 th2 = math.acos((c * c - L1 * L1 - L2 * L2) / (2 * L1 * L2))
-                th1 = math.atan2(tPy, tPx) - math.acos(
-                    (c * c + L1 * L1 - L2 * L2) / (2 * L1 * c)
-                )
+                th1 = math.atan2(tPy, tPx) - math.acos((c * c + L1 * L1 - L2 * L2) / (2 * L1 * c))
             th3 = tht - th1 - th2
 
         except:
@@ -79,16 +77,8 @@ class Take_a_Bag:
             return -1
 
         # 念のため、順運動学で検算
-        x = (
-            L1 * math.cos(th1)
-            + L2 * math.cos(th1 + th2)
-            + L3 * math.cos(th1 + th2 + th3)
-        )
-        y = (
-            L1 * math.sin(th1)
-            + L2 * math.sin(th1 + th2)
-            + L3 * math.sin(th1 + th2 + th3)
-        )
+        x = L1 * math.cos(th1) + L2 * math.cos(th1 + th2) + L3 * math.cos(th1 + th2 + th3)
+        y = L1 * math.sin(th1) + L2 * math.sin(th1 + th2) + L3 * math.sin(th1 + th2 + th3)
         if abs(Px - x) > 1.0 or abs(Py - y) > 1.0:
             rospy.loginfo("move_arm: No solution")
             return -1

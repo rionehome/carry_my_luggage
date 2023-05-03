@@ -1,13 +1,15 @@
 #!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 
-import rospy
-import cv2
-import torch
-from carry_my_luggage.msg import PersonDetect
-from std_msgs.msg import String
-from finger_direction import get_direction
 import time
+
+import cv2
+import rospy
+import torch
+from std_msgs.msg import String
+
+from carry_my_luggage.msg import PersonDetect
+from finger_direction import get_direction
 
 
 class Camera:

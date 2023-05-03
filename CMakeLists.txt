@@ -6,25 +6,23 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
 )
-add_service_files(
-  FILES
-  isMeaning.srv
-  MoveArm.srv
-  SpeechToText.srv
-)
 
 add_message_files(
   FILES
   ArmAction.msg
   LidarData.msg
   MoveAction.msg
-  PersonDetect.msg
+  Detect.msg
 )
 
 add_service_files(
   FILES
   Camera_msg.srv
   MoveArm.srv
+  SpeechToText.srv
+  TextToSpeech.srv
+  IsMeaning.srv
+  HandDirection.srv
 )
 
 generate_messages(

@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import time
+
 import rospy
 from geometry_msgs.msg import Twist
+
 from carry_my_luggage.msg import MoveAction
-import time
 
 LINEAR_SPEED = 0.15  # m/s
 ANGULAR_SPEED = 0.5  # m/s
