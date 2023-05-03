@@ -257,6 +257,8 @@ class MainSystem:
 
             rospy.Rate(10).sleep()
 
+        self.audio_tts_client("I finished program")
+
         rospy.loginfo("carry_my_luggage finish!")
 
     def image_person_detect_distance_callback(self, msg):
