@@ -205,11 +205,11 @@ class ImageSystem:
                 p_xmid.append(int(xmid))
                 p_ymid.append(int(ymid))
 
-                if xmid > 0 and xmid <= WIDTH * (1 / 3):
+                if xmid > 0 and xmid <= WIDTH * (2 / 5):
                     p_direction.append("left")
-                elif xmid > WIDTH * (1 / 3) and xmid <= WIDTH * (2 / 3):
+                elif xmid > WIDTH * (2 / 5) and xmid <= WIDTH * (3 / 5):
                     p_direction.append("middle")
-                elif xmid > WIDTH * (2 / 3) and xmid < WIDTH:
+                elif xmid > WIDTH * (3 / 5) and xmid < WIDTH:
                     p_direction.append("right")
 
             if obj.name[i] == "holding":
@@ -230,11 +230,11 @@ class ImageSystem:
                 h_xmid.append(int(xmid))
                 h_ymid.append(int(ymid))
 
-                if xmid > 0 and xmid <= WIDTH * (1 / 3):
+                if xmid > 0 and xmid <= WIDTH * (2 / 5):
                     h_direction.append("left")
-                elif xmid > WIDTH * (1 / 3) and xmid <= WIDTH * (2 / 3):
+                elif xmid > WIDTH * (2 / 5) and xmid <= WIDTH * (3 / 5):
                     h_direction.append("middle")
-                elif xmid > WIDTH * (2 / 3) and xmid < WIDTH:
+                elif xmid > WIDTH * (3 / 5) and xmid < WIDTH:
                     h_direction.append("right")
 
         d = Detect()

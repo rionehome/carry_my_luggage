@@ -114,56 +114,50 @@ class MainSystem:
             h_direction = self.holding_direction
             h_width = self.holding_width
 
-            if h_count >= 2 and direction in h_direction and did_turn == False:
+            max_width = 0
+            max_direction = ""
+
+            if direction in p_direction:
                 if direction == "right":
-                    t.angular.z = -0.6
+                    t.angular.z = -0.4
                 elif direction == "left":
-                    t.angular.z = 0.6
+                    t.angular.z = 0.4
                 else:
                     t.angular.z = 0
-                    did_turn = True
-
-                self.control_vel_pub.publish(t)
-            elif p_count >= 2:
-                max_width = 0
+            else:
                 for i in range(p_count):
                     if max_width < p_width[i]:
                         max_width = p_width[i]
-                        direction = p_direction[i]
+                        max_direction = p_direction[i]
 
-                if max_width > 450:
-                    t.linear.x = 0
-                else:
-                    t.linear.x = 0.12
-
-                self.control_vel_pub.publish(t)
-
-            elif p_count == 1:
-                max_width = p_width[0]
-                d = p_direction[0]
-
-                if max_width > 450:
-                    t.linear.x = 0
-                else:
-                    t.linear.x = 0.12
-
-                if d == "right":
-                    t.angular.z = -0.7
-                elif d == "left":
-                    t.angular.z = 0.7
+                if max_direction == "right":
+                    t.angular.z = -0.6
+                elif max_direction == "left":
+                    t.angular.z = 0.6
                 else:
                     t.angular.z = 0
 
-                if max_width > 450 and d == "middle":
-                    if paperbag_timer % 180:
-                        self.image_paperbag_detect_switch_pub.publish("off")
+                if max_width < 460:
+                    t.linear.x = 0.03
+                else:
+                    t.linear.x = 0
+
+                    if paperbag_timer > 0 and paperbag_timer % 180 == 0:
                         break
 
                     paperbag_timer += 1
 
-                self.control_vel_pub.publish(t)
+            self.control_vel_pub.publish(t)
 
-                # rospy.loginfo(max_width)
+        now = time.time()
+
+        while time.time() - now < 5:
+            t = Twist()
+            t.linear.x = 0.06
+            self.control_vel_pub.publish(t)
+
+        # wait to completly stop
+        time.sleep(2)
 
         # 初期位置
         self.control_arm(0, 0, 0, 0)
@@ -175,11 +169,17 @@ class MainSystem:
         self.control_arm(35, 7, 10, 2)
         # ひっかける！
         self.control_arm(37, 7, 30, 2)
+
+        self.audio_tts_client("Sorry can you put the bag to arm for me?")
+
         # もちあげてからの〜
         self.control_arm(30, 20, 30, 2)
+        # 怪しまれないように元あった場所にしまっておこう
+        self.control_arm(18, 20, 30, 2)
 
+        self.audio_tts_client("I will wait for 5 seconds")
         # wait for hooking paperbag manually
-        time.sleep(10)
+        time.sleep(5)
 
         persondetect_timer = 0
 
@@ -195,28 +195,19 @@ class MainSystem:
                 height = self.person_height[0]
                 xmid = self.person_xmid[0]
 
-                # if direction == "right":
-                #     rospy.loginfo("right")
-                #     t.angular.z = - 0.7
-                # elif direction == "middle":
-                #     rospy.loginfo("middle")
-                # elif direction == "left":
-                #     rospy.loginfo("left")
-                #     t.angular.z = 0.7
-
                 if xmid > (WIDTH / 2) - 15 and xmid < (WIDTH / 2) + 15:
                     pass
                 elif xmid < WIDTH / 2:
-                    t.angular.z = 0.5
+                    t.angular.z = 0.4
                 elif xmid > WIDTH / 2:
-                    t.angular.z = -0.5
+                    t.angular.z = -0.4
 
                 if height >= 460:
                     t.linear.x = 0
                 elif height < 460 and height >= 410:
                     t.linear.x = 0.06
                 elif height < 410:
-                    t.linear.x = 0.12
+                    t.linear.x = 0.08
 
             elif count > 1:
                 max_height = max(self.person_height)
@@ -228,20 +219,22 @@ class MainSystem:
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20:
                     pass
                 elif xmid < WIDTH / 2:
-                    t.angular.z = 0.7
+                    t.angular.z = 0.4
                 elif xmid > WIDTH / 2:
-                    t.angular.z = -0.7
+                    t.angular.z = -0.4
 
                 if height >= 400:
                     t.linear.x = 0
                 elif height < 400 and height >= 350:
-                    t.linear.x = 0.1
+                    t.linear.x = 0.06
                 elif height < 350:
-                    t.linear.x = 0.15
+                    t.linear.x = 0.08
 
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20 and height >= 400:
-                    if persondetect_timer % 180 == 0:
-                        self.audio_tts_client("Did you arrive at parking?")
+                    if persondetect_timer > 0 and persondetect_timer % 120 == 0:
+                        self.audio_tts_client("Did you arrive at parking lot?")
+                        self.audio_tts_client("Answer with yes or no")
+
                         i = self.audio_stt_client()
                         if i.res == "yes" or i.res == "Yes":
                             break
@@ -256,6 +249,17 @@ class MainSystem:
             self.control_vel_pub.publish(t)
 
             rospy.Rate(10).sleep()
+
+        self.audio_tts_client("Please take your bag")
+
+        self.control_arm(30, 20, 30, 2)
+
+        self.audio_tts_client("Take your time I will wait for you")
+
+        # wait for opetator to get the bag
+        time.sleep(5)
+
+        self.audio_tts_client("I finished program")
 
         rospy.loginfo("carry_my_luggage finish!")
 
