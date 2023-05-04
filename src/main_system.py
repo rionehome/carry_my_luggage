@@ -228,8 +228,9 @@ class MainSystem:
         # もちあげてからの〜
         self.control_arm(30, 20, 30, 2)
 
+        self.audio_tts_client("I will wait for 5 seconds")
         # wait for hooking paperbag manually
-        time.sleep(10)
+        time.sleep(5)
 
         persondetect_timer = 0
 
@@ -287,7 +288,6 @@ class MainSystem:
 
                         i = self.audio_stt_client()
                         if i.res == "yes" or i.res == "Yes":
-                            self.audio_tts_client("Please take your bag")
                             break
 
                         persondetect_timer = 0
@@ -300,6 +300,11 @@ class MainSystem:
             self.control_vel_pub.publish(t)
 
             rospy.Rate(10).sleep()
+
+        self.audio_tts_client("Please take your bag")
+
+        # wait for opetator to get the bag
+        time.sleep(5)
 
         self.audio_tts_client("I finished program")
 
