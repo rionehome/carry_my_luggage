@@ -13,12 +13,6 @@ from carry_my_luggage.srv import HandDirection, IsMeaning, MoveArm, SpeechToText
 WIDTH = 640
 HEIGHT = 480
 
-PAPERBAG_LINEAR = 0.03
-PAPERBAG_ANGULAR = 0.4
-
-PERSON_LINEAR = 0.06
-PERSON_ANGULAR = 0.4
-
 
 class MainSystem:
     def __init__(self):
@@ -125,9 +119,9 @@ class MainSystem:
 
             if direction in p_direction:
                 if direction == "right":
-                    t.angular.z = PAPERBAG_LINEAR * -1
+                    t.angular.z = -0.4
                 elif direction == "left":
-                    t.angular.z = PAPERBAG_LINEAR
+                    t.angular.z = 0.4
                 else:
                     t.angular.z = 0
             else:
@@ -137,14 +131,14 @@ class MainSystem:
                         max_direction = p_direction[i]
 
                 if max_direction == "right":
-                    t.angular.z = PAPERBAG_ANGULAR * -1
+                    t.angular.z = -0.6
                 elif max_direction == "left":
-                    t.angular.z = PAPERBAG_ANGULAR
+                    t.angular.z = 0.6
                 else:
                     t.angular.z = 0
 
                 if max_width < 460:
-                    t.linear.x = PAPERBAG_LINEAR
+                    t.linear.x = 0.03
                 else:
                     t.linear.x = 0
 
@@ -249,16 +243,16 @@ class MainSystem:
                 if xmid > (WIDTH / 2) - 15 and xmid < (WIDTH / 2) + 15:
                     pass
                 elif xmid < WIDTH / 2:
-                    t.angular.z = PERSON_ANGULAR
+                    t.angular.z = 0.4
                 elif xmid > WIDTH / 2:
-                    t.angular.z = PERSON_ANGULAR * -1
+                    t.angular.z = -0.4
 
                 if height >= 460:
                     t.linear.x = 0
                 elif height < 460 and height >= 410:
-                    t.linear.x = PERSON_LINEAR / 2
+                    t.linear.x = 0.04
                 elif height < 410:
-                    t.linear.x = PERSON_LINEAR
+                    t.linear.x = 0.08
 
             elif count > 1:
                 max_height = max(self.person_height)
@@ -270,16 +264,16 @@ class MainSystem:
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20:
                     pass
                 elif xmid < WIDTH / 2:
-                    t.angular.z = PERSON_ANGULAR
+                    t.angular.z = 0.4
                 elif xmid > WIDTH / 2:
-                    t.angular.z = PERSON_ANGULAR * -1
+                    t.angular.z = -0.4
 
                 if height >= 400:
                     t.linear.x = 0
                 elif height < 400 and height >= 350:
-                    t.linear.x = PERSON_LINEAR / 2
+                    t.linear.x = 0.04
                 elif height < 350:
-                    t.linear.x = PERSON_LINEAR
+                    t.linear.x = 0.08
 
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20 and height >= 400:
                     if persondetect_timer > 0 and persondetect_timer % 180 == 0:
