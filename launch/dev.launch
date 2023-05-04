@@ -13,4 +13,5 @@
   <node pkg="carry_my_luggage" name="audio_system" type="audio_system.py" output="screen" />
   <node pkg="carry_my_luggage" name="arm" type="arm.py" output="screen" />
   <node pkg="carry_my_luggage" name="move_arm" type="move_arm.py" output="screen" />
+  <node pkg="carry_my_luggage" name="lidar" type="lidar.py" output="screen" />
 </launch>

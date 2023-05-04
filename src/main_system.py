@@ -7,7 +7,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
 
-from carry_my_luggage.msg import Detect
+from carry_my_luggage.msg import Detect, LidarData
 from carry_my_luggage.srv import HandDirection, IsMeaning, MoveArm, SpeechToText, TextToSpeech
 
 WIDTH = 640
@@ -244,9 +244,9 @@ class MainSystem:
                 if xmid > (WIDTH / 2) - 15 and xmid < (WIDTH / 2) + 15:
                     pass
                 elif xmid < WIDTH / 2:
-                    t.angular.z = 0.5
+                    t.angular.z = 0.4
                 elif xmid > WIDTH / 2:
-                    t.angular.z = -0.5
+                    t.angular.z = -0.4
 
                 if height >= 460:
                     t.linear.x = 0
@@ -265,9 +265,9 @@ class MainSystem:
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20:
                     pass
                 elif xmid < WIDTH / 2:
-                    t.angular.z = 0.5
+                    t.angular.z = 0.4
                 elif xmid > WIDTH / 2:
-                    t.angular.z = -0.5
+                    t.angular.z = -0.4
 
                 if height >= 400:
                     t.linear.x = 0
@@ -277,8 +277,8 @@ class MainSystem:
                     t.linear.x = 0.08
 
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20 and height >= 400:
-                    if persondetect_timer > 0 and persondetect_timer % 180 == 0:
-                        self.audio_tts_client("Did you arrive at parking?")
+                    if persondetect_timer > 0 and persondetect_timer % 120 == 0:
+                        self.audio_tts_client("Did you arrive at parking lot?")
                         self.audio_tts_client("Answer with yes or no")
 
                         i = self.audio_stt_client()
