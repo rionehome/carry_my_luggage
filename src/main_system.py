@@ -119,9 +119,9 @@ class MainSystem:
 
             if direction in p_direction:
                 if direction == "right":
-                    t.angular.z = -0.6
+                    t.angular.z = -0.4
                 elif direction == "left":
-                    t.angular.z = 0.6
+                    t.angular.z = 0.4
                 else:
                     t.angular.z = 0
             else:
@@ -138,7 +138,7 @@ class MainSystem:
                     t.angular.z = 0
 
                 if max_width < 460:
-                    t.linear.x = 0.06
+                    t.linear.x = 0.03
                 else:
                     t.linear.x = 0
 
@@ -152,7 +152,7 @@ class MainSystem:
         now = time.time()
 
         while time.time() - now < 5:
-            t.linear.x = 0.03
+            t.linear.x = 0.06
             self.control_vel_pub.publish(t)
 
         # wait to completly stop
@@ -242,16 +242,16 @@ class MainSystem:
                 if xmid > (WIDTH / 2) - 15 and xmid < (WIDTH / 2) + 15:
                     pass
                 elif xmid < WIDTH / 2:
-                    t.angular.z = 0.5
+                    t.angular.z = 0.4
                 elif xmid > WIDTH / 2:
-                    t.angular.z = -0.5
+                    t.angular.z = -0.4
 
                 if height >= 460:
                     t.linear.x = 0
                 elif height < 460 and height >= 410:
-                    t.linear.x = 0.06
+                    t.linear.x = 0.04
                 elif height < 410:
-                    t.linear.x = 0.12
+                    t.linear.x = 0.08
 
             elif count > 1:
                 max_height = max(self.person_height)
@@ -263,16 +263,16 @@ class MainSystem:
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20:
                     pass
                 elif xmid < WIDTH / 2:
-                    t.angular.z = 0.5
+                    t.angular.z = 0.4
                 elif xmid > WIDTH / 2:
-                    t.angular.z = -0.5
+                    t.angular.z = -0.4
 
                 if height >= 400:
                     t.linear.x = 0
                 elif height < 400 and height >= 350:
-                    t.linear.x = 0.1
+                    t.linear.x = 0.04
                 elif height < 350:
-                    t.linear.x = 0.15
+                    t.linear.x = 0.08
 
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20 and height >= 400:
                     if persondetect_timer > 0 and persondetect_timer % 180 == 0:
