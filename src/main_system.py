@@ -244,14 +244,14 @@ class MainSystem:
                 if xmid > (WIDTH / 2) - 15 and xmid < (WIDTH / 2) + 15:
                     pass
                 elif xmid < WIDTH / 2:
-                    t.angular.z = 0.4
+                    t.angular.z = 0.5
                 elif xmid > WIDTH / 2:
-                    t.angular.z = -0.4
+                    t.angular.z = -0.5
 
                 if height >= 460:
                     t.linear.x = 0
                 elif height < 460 and height >= 410:
-                    t.linear.x = 0.04
+                    t.linear.x = 0.06
                 elif height < 410:
                     t.linear.x = 0.08
 
@@ -265,14 +265,14 @@ class MainSystem:
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20:
                     pass
                 elif xmid < WIDTH / 2:
-                    t.angular.z = 0.4
+                    t.angular.z = 0.5
                 elif xmid > WIDTH / 2:
-                    t.angular.z = -0.4
+                    t.angular.z = -0.5
 
                 if height >= 400:
                     t.linear.x = 0
                 elif height < 400 and height >= 350:
-                    t.linear.x = 0.04
+                    t.linear.x = 0.06
                 elif height < 350:
                     t.linear.x = 0.08
 
