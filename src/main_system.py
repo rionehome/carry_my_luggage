@@ -220,8 +220,13 @@ class MainSystem:
         self.control_arm(35, 7, 10, 2)
         # ひっかける！
         self.control_arm(37, 7, 30, 2)
+
+        self.audio_tts_client("Sorry can you put the bag to arm for me?")
+
         # もちあげてからの〜
         self.control_arm(30, 20, 30, 2)
+        # 怪しまれないように元あった場所にしまっておこう
+        self.control_arm(18, 20, 30, 2)
 
         self.audio_tts_client("I will wait for 5 seconds")
         # wait for hooking paperbag manually
@@ -297,6 +302,9 @@ class MainSystem:
             rospy.Rate(10).sleep()
 
         self.audio_tts_client("Please take your bag")
+
+        self.control_arm(30, 20, 30, 2)
+
         self.audio_tts_client("Take your time I will wait for you")
 
         # wait for opetator to get the bag
