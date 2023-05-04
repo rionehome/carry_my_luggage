@@ -277,8 +277,11 @@ class MainSystem:
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20 and height >= 400:
                     if persondetect_timer > 0 and persondetect_timer % 180 == 0:
                         self.audio_tts_client("Did you arrive at parking?")
+                        self.audio_tts_client("Answer with yes or no")
+
                         i = self.audio_stt_client()
                         if i.res == "yes" or i.res == "Yes":
+                            self.audio_tts_client("Please take your bag")
                             break
 
                         persondetect_timer = 0
