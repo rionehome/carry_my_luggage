@@ -152,6 +152,7 @@ class MainSystem:
         now = time.time()
 
         while time.time() - now < 5:
+            t = Twist()
             t.linear.x = 0.06
             self.control_vel_pub.publish(t)
 
