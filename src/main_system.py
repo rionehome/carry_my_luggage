@@ -297,6 +297,7 @@ class MainSystem:
             rospy.Rate(10).sleep()
 
         self.audio_tts_client("Please take your bag")
+        self.audio_tts_client("Take your time I will wait for you")
 
         # wait for opetator to get the bag
         time.sleep(5)
