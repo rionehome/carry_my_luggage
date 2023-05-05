@@ -7,7 +7,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
 
-from carry_my_luggage.msg import Detect
+from carry_my_luggage.msg import Detect, LidarData
 from carry_my_luggage.srv import HandDirection, IsMeaning, MoveArm, SpeechToText, TextToSpeech
 
 WIDTH = 640
@@ -170,7 +170,9 @@ class MainSystem:
         # ひっかける！
         self.control_arm(37, 7, 30, 2)
 
-        self.audio_tts_client("Sorry can you put the bag to arm for me?")
+        self.audio_tts_client("Sorry can you put the bag to the arm for me?")
+
+        time.sleep(4)
 
         # もちあげてからの〜
         self.control_arm(30, 20, 30, 2)
@@ -205,9 +207,9 @@ class MainSystem:
                 if height >= 460:
                     t.linear.x = 0
                 elif height < 460 and height >= 410:
-                    t.linear.x = 0.06
-                elif height < 410:
                     t.linear.x = 0.08
+                elif height < 410:
+                    t.linear.x = 0.10
 
             elif count > 1:
                 max_height = max(self.person_height)
@@ -226,9 +228,9 @@ class MainSystem:
                 if height >= 400:
                     t.linear.x = 0
                 elif height < 400 and height >= 350:
-                    t.linear.x = 0.06
-                elif height < 350:
                     t.linear.x = 0.08
+                elif height < 350:
+                    t.linear.x = 0.10
 
                 if xmid > (WIDTH / 2) - 20 and xmid < (WIDTH / 2) + 20 and height >= 400:
                     if persondetect_timer > 0 and persondetect_timer % 120 == 0:
@@ -258,6 +260,17 @@ class MainSystem:
 
         # wait for opetator to get the bag
         time.sleep(5)
+
+        self.audio_tts_client("I will try my best to go back")
+
+        lidar = rospy.wait_for_message("/control_system/lidar", LidarData)
+
+        i = lidar.left_right
+
+        # if i == "right":
+        #     # self.audio_tts_client("I will follow wall along the right")
+        # elif i == "left":
+        #     # self.audio_tts_client("I will follow wall along the left")
 
         self.audio_tts_client("I finished program")
 
