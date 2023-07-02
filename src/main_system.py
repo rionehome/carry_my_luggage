@@ -4,7 +4,7 @@
 import time
 
 import rospy
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, PoseStamped
 from std_msgs.msg import String
 
 from carry_my_luggage.msg import Detect, LidarData
@@ -12,6 +12,11 @@ from carry_my_luggage.srv import HandDirection, IsMeaning, MoveArm, SpeechToText
 
 WIDTH = 640
 HEIGHT = 480
+
+# ゴール地点の座標
+# あらかじめrvizなどで座標をとっておこう
+GOAL_X = 0
+GOAL_Y = 0
 
 
 class MainSystem:
@@ -21,6 +26,7 @@ class MainSystem:
         # control
         self.control_vel_pub = rospy.Publisher("/control_system/cmd_vel", Twist, queue_size=1)
         self.control_arm = rospy.ServiceProxy("/move_arm", MoveArm)
+        self.control_goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1)
 
         # image
         self.person_detect_distance = "far"
@@ -261,16 +267,7 @@ class MainSystem:
         # wait for opetator to get the bag
         time.sleep(5)
 
-        self.audio_tts_client("I will try my best to go back")
-
-        lidar = rospy.wait_for_message("/control_system/lidar", LidarData)
-
-        i = lidar.left_right
-
-        # if i == "right":
-        #     # self.audio_tts_client("I will follow wall along the right")
-        # elif i == "left":
-        #     # self.audio_tts_client("I will follow wall along the left")
+        self.send_goal(GOAL_X, GOAL_Y, 0)
 
         self.audio_tts_client("I finished program")
 
@@ -308,6 +305,21 @@ class MainSystem:
         self.holding_ymid = msg.ymid
         self.holding_width = msg.width
         self.holding_height = msg.height
+
+    def send_goal(self, x, y, yaw):
+        msg = PoseStamped()
+        msg.header.stamp = rospy.Time.now()
+        msg.header.frame_id = "map"
+        msg.pose.position.x = x
+        msg.pose.position.y = y
+        msg.pose.position.z = 0
+        # send orientation with quaternion
+        msg.pose.orientation.x = 0
+        msg.pose.orientation.y = 0
+        msg.pose.orientation.z = np.sin(yaw / 2)
+        msg.pose.orientation.w = np.cos(yaw / 2)
+
+        self.control_goal_pub.publish(msg)
 
 
 if __name__ == "__main__":
