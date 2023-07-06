@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
 import cv2
@@ -17,7 +17,7 @@ HEIGHT = 480
 
 class ImageSystem:
     def __init__(self):
-        matplotlib.use("Agg")  # fix weird Gtk 2 error
+        # matplotlib.use("Agg")  # fix weird Gtk 2 error
         rospy.init_node("image_system")
 
         # hand detection
@@ -27,7 +27,15 @@ class ImageSystem:
 
         # person detect
         self.is_person_detect_on = False
-        self.person_detect_model = torch.hub.load("ultralytics/yolov5", "yolov5s")
+        #self.person_detect_model = torch.hub.load("ultralytics/yolov5", "yolov5s")
+        self.person_detect_model = torch.hub.load(
+            "/home/ri-one/yolov5/",
+            "custom",
+            path="/home/ri-one/catkin_ws/src/carry_my_luggage/src/yolov5s.pt",
+            source="local",
+            force_reload=True,
+        )
+
         self.person_detect_switch_sub = rospy.Subscriber(
             "/image_system/person_detect/switch", String, self.person_detect_switch_callback
         )
@@ -76,6 +84,8 @@ class ImageSystem:
     def person_detect(self):
         ret, img = self.cap.read()  # 画像の大きさを取得するために1度だけ最初によびだす。
 
+        print(img)
+
         p_count = 0  # 人が写っているかどうかを判定するための変数
         p_direction = []
         p_distance = []
@@ -84,7 +94,7 @@ class ImageSystem:
         p_width = []
         p_height = []
 
-        ret, img = self.cap.read()
+        #ret, img = self.cap.read()
         result = self.person_detect_model(img)
 
         # 推論結果を取得

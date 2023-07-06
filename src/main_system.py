@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
 import time
@@ -76,6 +76,8 @@ class MainSystem:
         self.audio_is_meaning_client = rospy.ServiceProxy("/audio_system/is_meaning", IsMeaning)
 
     def main(self):
+
+
         rospy.loginfo("carry_my_luggage start!")
         rospy.loginfo("Sleeping for 6 seconds")
         rospy.loginfo("Please wait...")
@@ -84,6 +86,7 @@ class MainSystem:
         self.audio_tts_client("Please wait for seconds")
         time.sleep(3)
 
+        
         rospy.wait_for_service("/move_arm")
 
         self.audio_tts_client("Please point which paperbag you want to pick")
@@ -184,6 +187,8 @@ class MainSystem:
         time.sleep(5)
 
         persondetect_timer = 0
+
+        
 
         while True:
             t = Twist()

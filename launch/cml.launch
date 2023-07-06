@@ -5,7 +5,7 @@
   <!-- open_manipulator_controllerもlaunchファイルから起動できるが終了するときにノードが終了するので別の端末で手動で起動するのをすすめる -->
   <include file="$(find open_manipulator_controller)/launch/open_manipulator_controller.launch"/>
 
-  <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
+  <include file="$(find rplidar_ros)/launch/rplidar_a1.launch"/>
 
   <node pkg="carry_my_luggage" name="main_system" type="main_system.py" output="screen" />
   <node pkg="carry_my_luggage" name="control_system" type="control_system.py" output="screen" />
